@@ -1,0 +1,49 @@
+body {
+	background-color: rgb(238, 254, 250);
+}
+
+.page {
+	/*border-style: solid;*/
+	font-family: 'Marvel', sans-serif;
+	font-size: 32px;
+	margin:10px;
+
+}
+
+.sidebar {
+
+	width: 200px;
+	height: 90%;
+	position: fixed;
+	z-index: 1;
+
+	overflow-x: scroll;
+	margin-top: 25px;
+	border-right: 1px solid;
+	text-decoration: none;
+
+}
+
+.sections a {
+	display: block;
+	max-width: 200px;
+	margin-right: 50px;
+	text-decoration: none;
+	text-align: center;
+}
+
+.icons {
+	display: block;
+	position: absolute;
+	margin-bottom: 10%;
+	text-decoration: none;
+}
+#main {
+	margin-left: 200px;
+	padding: 100px;
+
+}
+
+#content {
+	word-wrap: break-word;
+}
