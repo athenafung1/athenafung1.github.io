@@ -3,9 +3,8 @@ body {
 }
 
 .page {
-	/*border-style: solid;*/
 	font-family: 'Marvel', sans-serif;
-	font-size: 32px;
+	font-size: 25px;
 	margin: 30px;
 
 }
@@ -15,7 +14,7 @@ body {
 	font-weight: 100;
 	font-family: Poiret One;
 	text-decoration: none;
-	
+	color: #48a7a8;
 }
 
 .sidebar {
@@ -26,6 +25,7 @@ body {
 	z-index: 1;
 
 	border-right: 1px solid;
+	border-color: #48a7a8;
 	overflow-x: scroll;
 	margin-top: 25px;
 	
@@ -37,11 +37,26 @@ body {
 .sections a {
 	display: block;
 	max-width: 200px;
-	
 	text-decoration: none;
 	padding: 10px;
 	margin: 20px;
 	text-align: center;
+}
+
+.dynamic-link {
+	background-color: lightblue;
+	color: #48a7a8;
+	transition: background-color .3s, color .3s, font-size .3s;
+}
+
+.dynamic-link:hover {
+	background-color: lightgreen;
+	font-weight: bold;
+	font-size: 30px;
+}
+
+.dynamic-icon {
+	color: lightblue;
 }
 
 .icons {
@@ -51,6 +66,8 @@ body {
 	margin-left: 48px;
 	text-decoration: none;
 }
+
+
 #main {
 	margin-left: 200px;
 	padding: 100px;
