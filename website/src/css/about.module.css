@@ -1,0 +1,21 @@
+#content {
+    /* border: 1px solid;
+    border-color: #48a7a8; */
+
+    margin-right: 150px;
+}
+
+p {
+    padding-left: 80px;
+    text-align: left;
+    line-height: 1.5;
+}
+
+.ulNoBullet {
+    padding-left: 10px;
+    list-style-type: none;
+}
+
+.liPadded {
+    padding-bottom: 5px;
+}

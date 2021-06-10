@@ -13,7 +13,7 @@ class Sidebar extends Component {
                         <div id={styles.navigationBar}>
                             <ul className={styles.ulNoBullet}>
                                 <li><a href="#about" className={styles.button}>about</a></li>
-                                <li><a href="#projects"className={styles.button}>projects</a></li>
+                                <li><a href="#projects" className={styles.button}>projects</a></li>
                             </ul>
                         </div>
                     </nav>

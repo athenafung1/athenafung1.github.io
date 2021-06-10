@@ -1,15 +1,26 @@
-ul.no-bullet {
-  list-style-type: none;
+:root {
+  --sidebar-right-pos: 350px;
+  --sidebar-content-margin: 50px;
+  --pop-text-color: rgb(54, 54, 143);
 }
 
+main {
+  margin-left: calc( var(--sidebar-right-pos) + var(--sidebar-content-margin) );
+  margin-top: 100px;
+  /* border: 1px solid;
+  border-color: #48a7a8; */
+}
 
+h1 {
+  display: inline-block;
+  margin: 5px;
+  color: var(--pop-text-color);
+}
 
-
-
-
-
-
-
+hr {
+  padding: 0;
+  text-align: left;
+}
 
 .App {
   text-align: center;
