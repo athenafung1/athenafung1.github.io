@@ -2,8 +2,10 @@ aside {
     width: var(--sidebar-right-pos);
     background-color: rgb(236, 250, 220);
     position: fixed;
+    overflow-y: auto;
     top: 0;
     bottom: 0;
+    height: 100%;
 }
 
 .sidebar {
@@ -63,12 +65,24 @@ aside {
 .iconLinks {
 	display: block;
 	position: absolute;
-	bottom: 25px;
     margin-left: 32%;
 }
 
-.dynamicIcon {
+.iconLinkButton {
     font-size: 30px;
     color: var(--pop-text-color);
     padding-left: 10px;
+    transition: color .3s;
 }
+
+.iconLinkButton:hover {
+    color: lightgreen;
+}
+
+/* #footer {
+    position: absolute;
+    bottom: 0;
+    font-size: 15px;
+    align-self: center;
+    color: var(--pop-text-color);
+} */

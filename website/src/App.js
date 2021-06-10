@@ -3,6 +3,7 @@ import Sidebar from './components/sidebar'
 import HomePage from './components/home'
 import AboutPage from './components/about'
 import ProjectsPage from './components/projects'
+import AdventuresPage from './components/adventures'
 
 
 // import logo from './logo.svg';
@@ -17,6 +18,7 @@ class App extends Component {
           <HomePage></HomePage>
           <AboutPage></AboutPage>
           <ProjectsPage></ProjectsPage>
+          <AdventuresPage></AdventuresPage>
         </div>
       </div>
     )
