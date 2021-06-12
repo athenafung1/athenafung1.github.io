@@ -1,0 +1,33 @@
+#content {
+    /* border: 1px solid;
+    border-color: #48a7a8; */
+}
+
+.slideshowContainer {
+    /* border: 1px solid;
+    border-color: #48a7a8; */
+
+    margin-left: 25%;
+    margin-right: 25%;
+
+    min-width: 180px !important;
+    padding-left: 40px;
+    padding-right: 40px;
+}
+ 
+/* .slideshow {
+    padding-bottom: 20%;
+    border: 1px solid;
+    border-color: #48a7a8;
+    display: block;
+} */
+
+.image {
+    max-height: 430px !important;
+    width: 100%;
+    min-width: 180px !important;
+    object-fit: contain;
+    /* transform: translate(); */
+    display: block;
+
+}
