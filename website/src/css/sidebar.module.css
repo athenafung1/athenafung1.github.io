@@ -1,0 +1,88 @@
+aside {
+    width: var(--sidebar-right-pos);
+    background-color: rgb(236, 250, 220);
+    position: fixed;
+    overflow-y: auto;
+    top: 0;
+    bottom: 0;
+    height: 100%;
+}
+
+.sidebar {
+	height: 100%;
+	position: sticky;
+	z-index: 1;
+
+	/* border-right: 1px solid;
+	border-color: #48a7a8;
+	overflow-x: scroll;
+	margin-top: 25px; */
+	
+	text-align: center;
+
+}
+
+.ulNoBullet {
+    padding: 0;
+    list-style-type: none;
+}
+
+#header {
+    word-wrap: break-word;
+    position: sticky;
+    font-size: 50px;
+    margin-top: 20%;
+    padding-inline: 50px;
+    align-self: center;
+}
+
+.button {
+    margin-top: 25px;
+    text-decoration: none;
+    padding: 0;
+
+    color: var(--pop-text-color);
+
+    transition: background-color .3s, color .3s, font-size .3s;
+}
+
+.button:hover {
+	background-color: lightgreen;
+	font-weight: bold;
+    font-size: 1.05em;
+}
+
+#navigationBar a {
+	display: block;
+    border: 1px solid;
+	border-color: rgba(28, 145, 28, 0.658);
+	padding: 10px;
+	margin: 50px;
+    align-self: center;
+	text-align: center;
+}
+
+.iconLinks {
+	display: block;
+	position: absolute;
+    margin-left: 32%;
+}
+
+.iconLinkButton {
+    font-size: 30px;
+    color: var(--pop-text-color);
+    padding-left: 10px;
+    transition: color .3s;
+}
+
+.iconLinkButton:hover {
+    color: lightgreen;
+}
+
+/* #footer {
+    position: absolute;
+    bottom: 0;
+    font-size: 15px;
+    align-self: center;
+    color: var(--pop-text-color);
+} */
