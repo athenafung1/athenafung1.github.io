@@ -28,7 +28,7 @@ class AdventuresPage extends Component {
         return (
             <main id="adventures">
                 <section id="header">
-                    <h1>my other adventures<hr></hr></h1>
+                    <h1>photography<hr></hr></h1>
                 </section>
                 <section id={styles.content}>
                     <div id="App"></div>
