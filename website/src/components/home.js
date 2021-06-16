@@ -6,7 +6,7 @@ class HomePage extends Component {
         return (
             <main id="home">
                 <section>
-                    <h1>home</h1>
+                    {/* <h1>home<hr></hr></h1> */}
                 </section>
             </main>
         )
