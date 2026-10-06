@@ -1,0 +1,58 @@
+---
+// Frame for an interactive piece on the Fun page. The page puts the island in the default slot
+// with its build-time fallback as the island's children (contracts/components.md):
+//   <PieceFrame …><FourierSketch client:visible><FourierFallback /></FourierSketch></PieceFrame>
+interface Props {
+  id: string;
+  name: string;
+  idea: string;
+}
+
+const { id, name, idea } = Astro.props;
+---
+
+<section class="piece" id={id} aria-labelledby={`${id}-title`}>
+  <div class="piece__head">
+    <p class="label">Play</p>
+    <h2 id={`${id}-title`}>{name}</h2>
+    <p class="piece__idea">{idea}</p>
+  </div>
+  <div class="piece__stage">
+    <slot />
+  </div>
+  <noscript>
+    <p class="piece__noscript label">The live version needs JavaScript; the drawing above shows what it makes.</p>
+  </noscript>
+</section>
+
+<style>
+  .piece {
+    display: grid;
+    gap: var(--space-m);
+    padding: var(--space-m);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-l);
+    background: var(--color-surface);
+  }
+
+  .piece__head {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .piece__idea {
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+
+  /* Keep the canvas and its controls within one screen on desktop. */
+  .piece__stage {
+    min-width: 0;
+    max-width: 52rem;
+  }
+
+  .piece__noscript {
+    margin: 0;
+  }
+</style>

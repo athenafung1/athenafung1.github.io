@@ -17,3 +17,9 @@ dist/
 # Local environment
 .env
 .env.local
+
+# Astro / tooling
+.astro/
+.lighthouseci/
+*.log
+.env*

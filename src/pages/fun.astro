@@ -1,0 +1,97 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import InterestEntry from '../components/InterestEntry.astro';
+import PieceFrame from '../components/PieceFrame.astro';
+import FourierFallback from '../components/FourierFallback.astro';
+import FourierSketch from '../islands/FourierSketch.svelte';
+import { PIECES } from '../islands/pieces.ts';
+import { countWords } from '../lib/content-rules.ts';
+
+const interests = (await getCollection('interests')).sort((a, b) => a.data.order - b.data.order);
+
+const orders = new Set<number>();
+for (const entry of interests) {
+  const file = `src/content/interests/${entry.id}.md`;
+  if (orders.has(entry.data.order)) throw new Error(`${file}: order ${entry.data.order} is used twice; give each interest a unique order.`);
+  orders.add(entry.data.order);
+  const words = countWords(entry.body ?? '');
+  if (words < 1 || words > 150) throw new Error(`${file}: the write-up is ${words} words; keep it between 1 and 150.`);
+}
+
+const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
+---
+
+<BaseLayout
+  ogImage="/og/fun.png"
+  title="Fun · Athena Fung"
+  description="What Athena Fung makes and does off the clock, plus a few mathematical toys to play with in the browser."
+>
+  <header class="fun-head">
+    <p class="label">Fun</p>
+    <h1 class="fun-head__title">Off the clock</h1>
+    <p class="fun-head__intro">
+      Things I make and do when nobody is grading them, and a few mathematical toys to poke at.
+    </p>
+  </header>
+
+  <PieceFrame id={fourier.id} name={fourier.name} idea={fourier.idea}>
+    <FourierSketch client:visible>
+      <FourierFallback />
+    </FourierSketch>
+  </PieceFrame>
+
+  <section class="section interests" aria-labelledby="interests-title">
+    <div class="section-head">
+      <p class="label">Interests</p>
+      <h2 id="interests-title">Interests &amp; endeavours</h2>
+    </div>
+    <ul class="interests__list" role="list">
+      {
+        interests.map((entry) => (
+          <li>
+            <InterestEntry entry={entry} headingLevel={3} />
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .fun-head {
+    display: grid;
+    gap: var(--space-2xs);
+    margin-block-end: var(--space-xl);
+  }
+
+  .fun-head__title {
+    font-size: var(--step-5);
+    view-transition-name: page-title;
+  }
+
+  .fun-head__intro {
+    max-width: var(--measure);
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+
+  .interests {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .interests__list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block-end: 1px solid var(--color-rule);
+  }
+
+  @media (min-width: 56rem) {
+    .interests__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--space-l);
+    }
+  }
+</style>

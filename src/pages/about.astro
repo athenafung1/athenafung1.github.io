@@ -1,0 +1,263 @@
+---
+import { existsSync, statSync } from 'node:fs';
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactLinks from '../components/ContactLinks.astro';
+
+const author = await getEntry('profile', 'author');
+if (!author) throw new Error('src/data/profile.yaml must define `author`.');
+const { name, bio, seeking, location, education, experience, skills, resume, contact } = author.data;
+
+// The downloadable resume must exist (FR-014); its size is shown next to the link.
+const resumeFile = `public${resume}`;
+if (!existsSync(resumeFile)) {
+  throw new Error(`${resumeFile} is missing: add the public resume PDF (no phone number or street address, FR-036).`);
+}
+const resumeSize = `${Math.max(1, Math.round(statSync(resumeFile).size / 1024))} KB`;
+
+// Plain-text bio: paragraphs separated by blank lines (no Markdown dependency).
+const paragraphs = bio
+  .split(/\n\s*\n/)
+  .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+  .filter(Boolean);
+---
+
+<BaseLayout
+  ogImage="/og/about.png"
+  title={`About · ${name}`}
+  description={`About ${name}: background, education, experience and skills, with a downloadable resume.`}
+>
+  <header class="about-head">
+    <p class="label">About</p>
+    <h1 class="about-head__title">Hello, I’m {name.split(' ')[0]}.</h1>
+    {location && <p class="label">Based in {location}</p>}
+  </header>
+
+  <div class="about">
+    <section class="about__bio prose" aria-label="Biography">
+      {paragraphs.map((paragraph, index) => <p class:list={{ lede: index === 0 }}>{paragraph}</p>)}
+      {seeking && <p class="about__seeking"><span class="label">Looking for</span> {seeking}</p>}
+      <p>
+        <a class="button button--primary" href={resume} download>
+          Download resume <span class="label resume-meta">PDF · {resumeSize}</span>
+        </a>
+      </p>
+    </section>
+
+    <section class="section" aria-labelledby="experience-title">
+      <div class="section-head">
+        <p class="label">01</p>
+        <h2 id="experience-title">Experience</h2>
+      </div>
+      <ol class="timeline" role="list">
+        {
+          experience.map((item) => (
+            <li class="timeline__item">
+              <p class="label timeline__period">{item.period}</p>
+              <div class="timeline__body">
+                <h3>
+                  {item.title}
+                  <span class="timeline__org">{item.organization}</span>
+                </h3>
+                <p>{item.summary}</p>
+                {item.highlights && (
+                  <ul class="timeline__highlights">
+                    {item.highlights.map((highlight) => (
+                      <li>{highlight}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="education-title">
+      <div class="section-head">
+        <p class="label">02</p>
+        <h2 id="education-title">Education</h2>
+      </div>
+      <ol class="timeline" role="list">
+        {
+          education.map((item) => (
+            <li class="timeline__item">
+              <p class="label timeline__period">{item.period}</p>
+              <div class="timeline__body">
+                <h3>
+                  {item.credential}
+                  <span class="timeline__org">{item.institution}</span>
+                </h3>
+                {item.details && <p>{item.details}</p>}
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="skills-title">
+      <div class="section-head">
+        <p class="label">03</p>
+        <h2 id="skills-title">Skills</h2>
+      </div>
+      <dl class="skills">
+        {
+          skills.map((group) => (
+            <div class="skills__group">
+              <dt class="label">{group.group}</dt>
+              <dd>
+                <ul class="skills__items" role="list">
+                  {group.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section>
+
+    <section class="section contact-call" aria-labelledby="contact-title">
+      <div class="section-head">
+        <p class="label">04</p>
+        <h2 id="contact-title">Get in touch</h2>
+      </div>
+      <p class="contact-call__text">
+        The fastest way to reach me is email: <a href={`mailto:${contact.email}`}>{contact.email}</a>. I’m also on
+        GitHub and LinkedIn.
+      </p>
+      <ContactLinks variant="compact" />
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .about-head {
+    display: grid;
+    gap: var(--space-2xs);
+    margin-block-end: var(--space-xl);
+  }
+
+  .about-head__title {
+    font-size: var(--step-5);
+    max-width: 16ch;
+    view-transition-name: page-title;
+  }
+
+  .about__bio .lede {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    line-height: var(--leading-snug);
+  }
+
+  .about__seeking .label {
+    display: block;
+  }
+
+  .resume-meta {
+    color: inherit;
+    opacity: 0.75;
+  }
+
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about > .section {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .timeline {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .timeline__item {
+    display: grid;
+    gap: var(--space-3xs) var(--space-l);
+    padding-block: var(--space-m);
+    border-block-start: 1px solid var(--color-rule);
+  }
+
+  .timeline__body {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+  }
+
+  .timeline__body h3 {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .timeline__org {
+    font-family: var(--font-text);
+    font-size: var(--step-0);
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  .timeline__highlights {
+    padding-inline-start: 1.1em;
+  }
+
+  .timeline__highlights li::marker {
+    color: var(--color-accent);
+  }
+
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-l);
+    margin: 0;
+  }
+
+  .skills__group {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block-start: var(--space-2xs);
+    border-block-start: 1px solid var(--color-rule);
+  }
+
+  .skills dd {
+    margin: 0;
+  }
+
+  .skills__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .skills__items li {
+    padding: 0.2em 0.7em;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--step--1);
+  }
+
+  .contact-call__text {
+    max-width: var(--measure);
+    margin-block-end: var(--space-s);
+    font-size: var(--step-1);
+  }
+
+  @media (min-width: 48rem) {
+    .timeline__item {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+
+    .timeline__period {
+      padding-block-start: 0.35em;
+    }
+  }
+</style>

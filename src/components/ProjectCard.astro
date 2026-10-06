@@ -1,0 +1,196 @@
+---
+// One project as a card (FR-009, FR-010). With `detail: true` the title links to the detail
+// page through a stretched pseudo-element; external links stay clickable above it.
+import type { CollectionEntry } from 'astro:content';
+import Picture from './Picture.astro';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  headingLevel?: 2 | 3;
+  index?: number;
+}
+
+const { project, headingLevel = 2, index } = Astro.props;
+const { title, summary, tech, links, image, period, detail } = project.data;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+const detailHref = detail ? `/projects/${project.id}/` : undefined;
+const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Writeup', publication: 'Publication' } as const;
+---
+
+<article class:list={['project-card', { 'project-card--image': image, 'project-card--linked': detailHref }]}>
+  <div class="project-card__grid">
+  {
+    image && (
+      <div class="project-card__media">
+        <Picture src={image.src} alt={image.alt} decorative={image.decorative} sizes="(min-width: 56rem) 40vw, 100vw" />
+      </div>
+    )
+  }
+  <div class="project-card__body">
+    <p class="label project-card__meta">
+      {index !== undefined && <span>№ {String(index + 1).padStart(2, '0')}</span>}
+      {period && <span>{period}</span>}
+    </p>
+    <Heading class="project-card__title">
+      {detailHref ? <a href={detailHref}>{title}</a> : title}
+    </Heading>
+    <p class="project-card__summary">{summary}</p>
+    <ul class="project-card__tech" role="list" aria-label="Technologies">
+      {tech.map((item) => <li>{item}</li>)}
+    </ul>
+    <ul class="project-card__links" role="list">
+      {
+        detailHref && (
+          <li>
+            <a class="project-card__more" href={detailHref} tabindex="-1" aria-hidden="true">
+              Read the case study <span class="button__arrow">→</span>
+            </a>
+          </li>
+        )
+      }
+      {
+        links.map((link) => (
+          <li>
+            <a href={link.url} rel="noopener">
+              {link.label ?? typeLabel[link.type]}
+              <span class="visually-hidden"> for {title}</span>
+              <span aria-hidden="true">↗</span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  </div>
+</article>
+
+<style>
+  .project-card {
+    position: relative;
+    padding-block: var(--space-m);
+    border-block-start: 1px solid var(--color-rule);
+    container-type: inline-size;
+  }
+
+  .project-card__grid {
+    display: grid;
+    gap: var(--space-m);
+  }
+
+  .project-card__media {
+    overflow: hidden;
+    border-radius: var(--radius-m);
+    background: var(--color-surface);
+  }
+
+  .project-card__media :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .project-card__body {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+    min-width: 0;
+  }
+
+  .project-card__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+  }
+
+  .project-card__title {
+    font-size: var(--step-2);
+  }
+
+  .project-card__title a {
+    text-decoration: none;
+  }
+
+  /* Stretched link: the whole card opens the detail page. */
+  .project-card--linked .project-card__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+
+  .project-card__summary {
+    max-width: var(--measure);
+    color: var(--color-text);
+  }
+
+  .project-card__tech,
+  .project-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .project-card__tech {
+    gap: var(--space-3xs) var(--space-xs);
+    font-size: var(--step--1);
+    font-variant-caps: all-small-caps;
+    letter-spacing: 0.05em;
+    color: var(--color-muted);
+  }
+
+  /* Separator after each item, so a wrapped line never starts with a dot. */
+  .project-card__tech li:not(:last-child)::after {
+    content: '·';
+    margin-inline-start: var(--space-xs);
+    color: var(--color-border);
+  }
+
+  .project-card__links {
+    gap: 0 var(--space-m);
+    margin-block-start: var(--space-3xs);
+  }
+
+  /* External links sit above the stretched link so they stay clickable. */
+  .project-card__links a {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em; /* Astro's JSX whitespace rules drop spaces between inline elements */
+    min-height: var(--tap);
+    font-weight: 600;
+  }
+
+  .project-card__more {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  @media (hover: hover) {
+    .project-card--linked:hover .project-card__title a {
+      color: var(--color-accent);
+    }
+
+    .project-card--linked:hover .project-card__media :global(img) {
+      transform: scale(1.03);
+    }
+
+    .project-card--linked:hover .button__arrow {
+      transform: translateX(3px);
+    }
+  }
+
+  .project-card--linked:focus-within {
+    outline: none;
+  }
+
+  @container (min-width: 40rem) {
+    .project-card--image .project-card__grid {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+      align-items: start;
+    }
+  }
+</style>

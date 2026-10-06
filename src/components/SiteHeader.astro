@@ -1,0 +1,67 @@
+---
+import { getEntry } from 'astro:content';
+import SiteNav from './SiteNav.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const author = await getEntry('profile', 'author');
+const name = author?.data.name ?? 'Athena Fung';
+
+// The site mark: a three-petal rose curve r = cos(3θ), one petal pointing up. Computed at build.
+const samples = 72;
+const rose = Array.from({ length: samples }, (_, i) => {
+  const t = (Math.PI * i) / samples;
+  const r = Math.cos(3 * t);
+  const angle = t - Math.PI / 2;
+  return `${(r * Math.cos(angle)).toFixed(2)} ${(r * Math.sin(angle)).toFixed(2)}`;
+});
+const rosePath = `M${rose.join(' L')} Z`;
+---
+
+<header class="site-header wrap">
+  <a class="site-mark tap-target" href="/" data-site-mark>
+    <svg class="site-mark__glyph" viewBox="-1.1 -1.1 2.2 2.2" width="28" height="28" aria-hidden="true" focusable="false">
+      <path
+        d={rosePath}
+        fill="none"
+        stroke="currentColor"
+        stroke-width=".14"
+        stroke-linejoin="round"></path>
+    </svg>
+    <span class="site-mark__name">{name}</span>
+  </a>
+  <SiteNav />
+  <ThemeToggle />
+</header>
+
+<style>
+  .site-mark {
+    grid-area: mark;
+    justify-self: start;
+    gap: var(--space-2xs);
+    padding-inline-end: var(--space-2xs);
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    text-decoration: none;
+    color: var(--color-text);
+    border-radius: var(--radius-m);
+    view-transition-name: site-mark;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .site-mark__glyph {
+    color: var(--color-accent);
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  @media (hover: hover) {
+    .site-mark:hover {
+      color: var(--color-text);
+    }
+
+    .site-mark:hover .site-mark__glyph {
+      transform: rotate(120deg);
+    }
+  }
+</style>

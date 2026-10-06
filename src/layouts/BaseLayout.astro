@@ -1,0 +1,92 @@
+---
+// Every page uses this layout; it is how pages inherit the shared shell without copying it
+// (FR-030). Contract: specs/001-portfolio-site/contracts/components.md.
+import { Font } from 'astro:assets';
+import { getEntry } from 'astro:content';
+import SiteHeader from '../components/SiteHeader.astro';
+import ContactLinks from '../components/ContactLinks.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/layout.css';
+
+interface Props {
+  title: string;
+  description: string;
+  ogImage?: string;
+  noindex?: boolean;
+}
+
+const { title, description, ogImage = '/og/default.png', noindex = false } = Astro.props;
+
+const site = Astro.site ?? new URL('https://athenafung1.github.io');
+const pathname = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const canonical = new URL(pathname, site).href;
+const ogImageUrl = new URL(ogImage, site).href;
+const author = await getEntry('profile', 'author');
+const name = author?.data.name ?? 'Athena Fung';
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <script is:inline>
+      try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+    <meta name="author" content={name} />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f5f1ea" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={name} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <Font cssVariable="--font-text" preload />
+    <Font cssVariable="--font-display" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <div class="page">
+      <SiteHeader />
+      <main id="main" class="site-main wrap" tabindex="-1">
+        <slot />
+      </main>
+      <footer class="site-footer wrap">
+        <ContactLinks />
+        <p class="label footer-note" data-egg-target>© {year} {name}</p>
+      </footer>
+    </div>
+    <script>
+      import '../scripts/theme.ts';
+      import '../scripts/eggs.ts';
+    </script>
+  </body>
+</html>
+
+<style>
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-s);
+  }
+
+  main:focus {
+    outline: none;
+  }
+</style>

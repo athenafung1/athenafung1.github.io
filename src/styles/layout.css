@@ -1,0 +1,77 @@
+@layer layout {
+  .page {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100svh;
+    padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right));
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: var(--page-max);
+    margin-inline: auto;
+  }
+
+  /* Header: mark on row 1, nav + toggle on row 2; one row from 48rem. No hamburger, no JS. */
+  .site-header {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'mark mark'
+      'nav  toggle';
+    align-items: center;
+    column-gap: var(--space-xs);
+    padding-block: var(--space-s) var(--space-2xs);
+    border-block-end: 1px solid var(--color-rule);
+  }
+
+  @media (min-width: 48rem) {
+    .site-header {
+      grid-template-columns: auto 1fr auto;
+      grid-template-areas: 'mark nav toggle';
+      column-gap: var(--space-m);
+      padding-block: var(--space-m);
+    }
+  }
+
+  .site-main {
+    padding-block: var(--space-xl) var(--space-2xl);
+    min-width: 0;
+  }
+
+  .site-footer {
+    padding-block: var(--space-l) max(var(--space-l), env(safe-area-inset-bottom));
+    border-block-start: 1px solid var(--color-rule);
+  }
+
+  /* Readable prose column inside the wide page. */
+  .prose {
+    max-width: var(--measure);
+  }
+
+  .prose > * + * {
+    margin-block-start: var(--space-s);
+  }
+
+  /* Editorial section: a small numbered label above a heading. */
+  .section + .section {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .section-head {
+    display: grid;
+    gap: var(--space-2xs);
+    margin-block-end: var(--space-l);
+    padding-block-start: var(--space-s);
+    border-block-start: 2px solid var(--color-text);
+  }
+
+  /* Containers for components that adapt to their slot, not the viewport. */
+  .cq {
+    container-type: inline-size;
+  }
+
+  .stack > * + * {
+    margin-block-start: var(--stack-space, var(--space-m));
+  }
+}

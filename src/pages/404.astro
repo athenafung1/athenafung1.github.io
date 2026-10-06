@@ -1,0 +1,35 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Page not found · Athena Fung"
+  description="That page doesn't exist. Head back to the home page or use the navigation to find what you were looking for."
+  noindex
+>
+  <section class="not-found">
+    <p class="label">Error 404</p>
+    <h1 class="not-found__title">Lost in the curve.</h1>
+    <p class="not-found__text">That page doesn't exist, or it has moved. The navigation above still works.</p>
+    <p><a class="button button--primary" href="/">Back to the home page <span class="button__arrow" aria-hidden="true">→</span></a></p>
+  </section>
+</BaseLayout>
+
+<style>
+  .not-found {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--measure);
+    padding-block: var(--space-xl);
+  }
+
+  .not-found__title {
+    font-size: var(--step-5);
+    view-transition-name: page-title;
+  }
+
+  .not-found__text {
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+</style>

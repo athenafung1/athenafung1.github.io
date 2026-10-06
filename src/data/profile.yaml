@@ -1,0 +1,33 @@
+# Author profile. Schema: src/content.config.ts (strict: no phone or street address, FR-036).
+# Every value starting with "DRAFT:" is a stand-in that scripts/check-content.mjs blocks from
+# deploying. Replace them with real content.
+author:
+  name: Athena Fung
+  role: "DRAFT: one-line statement of what you do, e.g. software engineer building ..."
+  strengths:
+    - "DRAFT: strength one"
+    - "DRAFT: strength two"
+  seeking: "DRAFT: what you're looking for (internships, full-time roles, collaborations)"
+  bio: |
+    DRAFT: a short first paragraph about who you are and what you work on.
+
+    DRAFT: a second paragraph about what drives you, outside the resume.
+  education:
+    - institution: University of Illinois Urbana-Champaign
+      credential: "DRAFT: degree and major (the old site said Computer Science)"
+      period: "DRAFT: years"
+  experience:
+    - organization: "DRAFT: organization"
+      title: "DRAFT: role title"
+      period: "DRAFT: period"
+      summary: "DRAFT: one or two sentences about the work and its impact."
+  skills:
+    - group: Languages
+      items: ["DRAFT: language"]
+    - group: Tools
+      items: ["DRAFT: tool"]
+  resume: /resume.pdf
+  contact:
+    email: athenafung1@gmail.com
+    github: https://github.com/athenafung1
+    linkedin: https://www.linkedin.com/in/athenafung1

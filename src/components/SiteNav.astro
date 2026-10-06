@@ -1,0 +1,95 @@
+---
+// Renders the single shared navigation list in src/data/nav.yaml (FR-002, FR-030).
+import { getCollection } from 'astro:content';
+
+const items = (await getCollection('nav')).map((entry) => entry.data).sort((a, b) => a.order - b.order);
+
+for (const key of ['id', 'order'] as const) {
+  const seen = new Set<string | number>();
+  for (const item of items) {
+    if (seen.has(item[key])) {
+      throw new Error(`src/data/nav.yaml: duplicate ${key} "${item[key]}". Each nav entry needs a unique ${key}.`);
+    }
+    seen.add(item[key]);
+  }
+}
+
+const path = Astro.url.pathname.endsWith('/') ? Astro.url.pathname : `${Astro.url.pathname}/`;
+const isCurrent = (href: string) => path === href || (href !== '/' && path.startsWith(href));
+---
+
+<nav class="site-nav" aria-label="Primary">
+  <ul role="list">
+    {
+      items.map((item) => (
+        <li>
+          <a class="tap-target" href={item.href} aria-current={isCurrent(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .site-nav {
+    grid-area: nav;
+    min-width: 0;
+  }
+
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-3xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  a {
+    position: relative;
+    padding-inline: var(--space-2xs);
+    font-size: var(--step-0);
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--color-muted);
+    border-radius: var(--radius-m);
+  }
+
+  a::after {
+    content: '';
+    position: absolute;
+    inset-inline: var(--space-2xs);
+    inset-block-end: 0.45rem;
+    height: 2px;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur) var(--ease);
+  }
+
+  a[aria-current='page'] {
+    color: var(--color-text);
+  }
+
+  a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  @media (hover: hover) {
+    a:hover {
+      color: var(--color-text);
+    }
+
+    a:hover::after {
+      transform: scaleX(1);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    ul {
+      justify-content: flex-end;
+    }
+  }
+</style>

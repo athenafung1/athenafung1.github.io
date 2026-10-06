@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import { assertUniqueOrder, sortProjects } from '../../lib/projects.ts';
+
+const entries = await getCollection('projects');
+if (entries.length === 0) {
+  throw new Error('At least one project is required (constitution Principle II): add a file to src/content/projects/');
+}
+assertUniqueOrder(entries);
+// Featured first, then the author's order. No other sorting, filtering or grouping (FR-011).
+const projects = sortProjects(entries);
+---
+
+<BaseLayout
+  ogImage="/og/projects.png"
+  title="Projects · Athena Fung"
+  description="Selected software, research and systems projects by Athena Fung, with the tools used and links to code and write-ups."
+>
+  <header class="page-head">
+    <p class="label">Work</p>
+    <h1 class="page-head__title">Projects</h1>
+    <p class="page-head__intro">
+      {projects.length === 1 ? 'One project so far, with more on the way.' : `${projects.length} projects, most recent and most representative first.`}
+    </p>
+  </header>
+
+  <ol class:list={['project-list', { 'project-list--single': projects.length === 1 }]} role="list">
+    {
+      projects.map((project, index) => (
+        <li>
+          <ProjectCard project={project} index={index} headingLevel={2} />
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>
+
+<style>
+  .page-head {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+    margin-block-end: var(--space-xl);
+  }
+
+  .page-head__title {
+    font-size: var(--step-5);
+    view-transition-name: page-title;
+  }
+
+  .page-head__intro {
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+
+  .project-list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block-end: 1px solid var(--color-rule);
+  }
+
+  /* A single entry gets the full width and a little more presence instead of a lonely column. */
+  .project-list--single :global(.project-card__title) {
+    font-size: var(--step-4);
+  }
+</style>

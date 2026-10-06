@@ -1,0 +1,79 @@
+/* Layer order for the whole site. Component <style> blocks are unlayered and win over these. */
+@layer reset, tokens, base, layout, components, utilities;
+
+@layer tokens {
+  :root {
+    /* Follow the device unless the visitor picked a theme (data-theme set by the head script). */
+    color-scheme: light dark;
+
+    /* Color: defined once with light-dark(). Contrast checked for WCAG 2.1 AA in both themes
+       (text ≥ 15:1, muted ≥ 6.5:1, accent ≥ 5:1, UI borders and focus ≥ 3:1). */
+    --color-bg: light-dark(#f5f1ea, #121110);
+    --color-surface: light-dark(#fffcf7, #1c1a17);
+    --color-text: light-dark(#1b1915, #efe9df);
+    --color-muted: light-dark(#5a554c, #aaa296);
+    --color-accent: light-dark(#b3401d, #ff8d63);
+    --color-accent-ink: light-dark(#ffffff, #1b0f0a);
+    --color-border: light-dark(#8f877a, #7a7268);
+    --color-rule: light-dark(#ddd6ca, #35312b);
+    --color-focus: light-dark(#1f4ed8, #8fb0ff);
+    --color-curve: light-dark(#b3401d, #ff8d63);
+
+    /* Type: Astro's Fonts API defines --font-display and --font-text (with metric-matched
+       fallbacks). Fluid steps scale linearly from 320px to 1280px viewports. */
+    --step--1: clamp(0.833rem, 0.81rem + 0.12vw, 0.9rem);
+    --step-0: clamp(1rem, 0.958rem + 0.21vw, 1.125rem);
+    --step-1: clamp(1.2rem, 1.117rem + 0.42vw, 1.45rem);
+    --step-2: clamp(1.44rem, 1.293rem + 0.73vw, 1.88rem);
+    --step-3: clamp(1.728rem, 1.49rem + 1.19vw, 2.44rem);
+    --step-4: clamp(2.074rem, 1.71rem + 1.82vw, 3.17rem);
+    --step-5: clamp(2.488rem, 1.92rem + 2.84vw, 4.19rem);
+    --step-display: clamp(2.75rem, 1.5rem + 6.25vw, 6.5rem);
+
+    --leading-tight: 1.05;
+    --leading-snug: 1.25;
+    --leading-body: 1.6;
+    --measure: 66ch;
+
+    /* Space: fluid where it shapes the page, fixed where it shapes controls. */
+    --space-3xs: 0.25rem;
+    --space-2xs: 0.5rem;
+    --space-xs: 0.75rem;
+    --space-s: 1rem;
+    --space-m: clamp(1.25rem, 1.12rem + 0.63vw, 1.625rem);
+    --space-l: clamp(1.75rem, 1.5rem + 1.25vw, 2.5rem);
+    --space-xl: clamp(2.5rem, 2.08rem + 2.08vw, 3.75rem);
+    --space-2xl: clamp(3.5rem, 2.67rem + 4.17vw, 6rem);
+    --gutter: clamp(1rem, 0.67rem + 1.67vw, 2rem);
+    --page-max: 80rem;
+
+    --radius-s: 0.25rem;
+    --radius-m: 0.5rem;
+    --radius-l: 1rem;
+
+    --tap: 2.75rem; /* 44px minimum touch target */
+
+    --dur-fast: 150ms;
+    --dur: 300ms;
+    --dur-slow: 700ms;
+    --dur-draw: 2.4s;
+    --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+
+  :root[data-theme='dark'] {
+    color-scheme: dark;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --dur-fast: 0s;
+      --dur: 0s;
+      --dur-slow: 0s;
+      --dur-draw: 0s;
+    }
+  }
+}
