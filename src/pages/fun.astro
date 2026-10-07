@@ -4,7 +4,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import InterestEntry from '../components/InterestEntry.astro';
 import PieceFrame from '../components/PieceFrame.astro';
 import FourierFallback from '../components/FourierFallback.astro';
+import NBodyFallback from '../components/NBodyFallback.astro';
+import AttractorFallback from '../components/AttractorFallback.astro';
 import FourierSketch from '../islands/FourierSketch.svelte';
+import NBody from '../islands/NBody.svelte';
+import FractalExplorer from '../islands/FractalExplorer.svelte';
+import Attractor from '../islands/Attractor.svelte';
+import LSystem from '../islands/LSystem.svelte';
+import FlowField from '../islands/FlowField.svelte';
+import DoublePendulum from '../islands/DoublePendulum.svelte';
+import MonteCarloPi from '../islands/MonteCarloPi.svelte';
+import Automaton from '../islands/Automaton.svelte';
+import VoronoiDivider from '../islands/VoronoiDivider.svelte';
+import FunFacts from '../islands/FunFacts.svelte';
 import { PIECES } from '../islands/pieces.ts';
 import { countWords } from '../lib/content-rules.ts';
 
@@ -19,7 +31,11 @@ for (const entry of interests) {
   if (words < 1 || words > 150) throw new Error(`${file}: the write-up is ${words} words; keep it between 1 and 150.`);
 }
 
-const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
+const piece = (id: string) => {
+  const found = PIECES.find((p) => p.id === id);
+  if (!found) throw new Error(`src/islands/pieces.ts has no piece "${id}".`);
+  return found;
+};
 ---
 
 <BaseLayout
@@ -28,18 +44,75 @@ const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
   description="What Athena Fung makes and does off the clock, plus a few mathematical toys to play with in the browser."
 >
   <header class="fun-head">
+    <Automaton decorative client:visible />
     <p class="label">Fun</p>
     <h1 class="fun-head__title">Off the clock</h1>
     <p class="fun-head__intro">
       Things I make and do when nobody is grading them, and a few mathematical toys to poke at.
     </p>
+    <nav class="fun-jump" aria-label="Jump to a piece">
+      <ul role="list">
+        {PIECES.map((p) => <li><a class="chip fun-jump__link" href={`#${p.id}`}>{p.name}</a></li>)}
+        <li><a class="chip fun-jump__link" href="#interests-title">Interests</a></li>
+      </ul>
+    </nav>
   </header>
 
-  <PieceFrame id={fourier.id} name={fourier.name} idea={fourier.idea}>
-    <FourierSketch client:visible>
-      <FourierFallback />
-    </FourierSketch>
-  </PieceFrame>
+  <div class="pieces">
+    <PieceFrame {...piece('fourier-sketch')}>
+      <FourierSketch client:visible><FourierFallback /></FourierSketch>
+    </PieceFrame>
+
+    <PieceFrame {...piece('n-body')}>
+      <NBody client:visible><NBodyFallback /></NBody>
+    </PieceFrame>
+
+    <PieceFrame {...piece('fractal')} fallback="description">
+      <FractalExplorer client:visible>
+        <p class="piece-status">A zoomable picture of the Mandelbrot set: points c for which z ↦ z² + c stays bounded.</p>
+      </FractalExplorer>
+    </PieceFrame>
+
+    <VoronoiDivider seed={11} client:visible />
+
+    <PieceFrame {...piece('attractor')}>
+      <Attractor client:visible><AttractorFallback /></Attractor>
+    </PieceFrame>
+
+    <PieceFrame {...piece('l-system')}>
+      <LSystem client:visible />
+    </PieceFrame>
+
+    <PieceFrame {...piece('flow-field')} fallback="description">
+      <FlowField client:visible>
+        <p class="piece-status">Thousands of particles drifting along a smooth random vector field, leaving fading trails.</p>
+      </FlowField>
+    </PieceFrame>
+
+    <VoronoiDivider seed={23} client:visible />
+
+    <PieceFrame {...piece('pendulum')} fallback="description">
+      <DoublePendulum client:visible>
+        <p class="piece-status">Two double pendulums started 0.001 radians apart move together for a few seconds, then diverge completely.</p>
+      </DoublePendulum>
+    </PieceFrame>
+
+    <PieceFrame {...piece('monte-carlo')} fallback="description">
+      <MonteCarloPi client:visible>
+        <p class="piece-status">Random points in a unit square: about π/4 of them land inside the quarter circle.</p>
+      </MonteCarloPi>
+    </PieceFrame>
+
+    <PieceFrame {...piece('automata')} fallback="description">
+      <Automaton client:visible />
+    </PieceFrame>
+  </div>
+
+  <div class="fun-facts">
+    <FunFacts client:visible />
+  </div>
+
+  <VoronoiDivider seed={37} client:visible />
 
   <section class="section interests" aria-labelledby="interests-title">
     <div class="section-head">
@@ -60,9 +133,16 @@ const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
 
 <style>
   .fun-head {
+    position: relative;
+    isolation: isolate;
     display: grid;
     gap: var(--space-2xs);
     margin-block-end: var(--space-xl);
+    padding-block: var(--space-m);
+  }
+
+  .fun-head :global(.ca--band) {
+    z-index: -1;
   }
 
   .fun-head__title {
@@ -76,8 +156,38 @@ const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
     color: var(--color-muted);
   }
 
+  .fun-jump ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin: var(--space-s) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .fun-jump__link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    font-size: var(--step--1);
+    background: var(--color-bg);
+  }
+
+  .pieces {
+    display: grid;
+    gap: var(--space-xl);
+  }
+
+  .pieces > :global(.piece) {
+    scroll-margin-top: var(--space-l);
+  }
+
+  .fun-facts {
+    margin-block: var(--space-2xl) var(--space-l);
+  }
+
   .interests {
-    margin-block-start: var(--space-2xl);
+    margin-block-start: var(--space-xl);
   }
 
   .interests__list {

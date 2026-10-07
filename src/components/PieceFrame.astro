@@ -6,9 +6,11 @@ interface Props {
   id: string;
   name: string;
   idea: string;
+  /** What no-JS visitors see in place of the live piece: a drawing or a text description. */
+  fallback?: 'image' | 'description';
 }
 
-const { id, name, idea } = Astro.props;
+const { id, name, idea, fallback = 'image' } = Astro.props;
 ---
 
 <section class="piece" id={id} aria-labelledby={`${id}-title`}>
@@ -21,7 +23,9 @@ const { id, name, idea } = Astro.props;
     <slot />
   </div>
   <noscript>
-    <p class="piece__noscript label">The live version needs JavaScript; the drawing above shows what it makes.</p>
+    <p class="piece__noscript label">
+      {fallback === 'image' ? 'The live version needs JavaScript; the drawing above shows what it makes.' : 'This one is interactive and needs JavaScript.'}
+    </p>
   </noscript>
 </section>
 

@@ -1,0 +1,43 @@
+---
+// Build-time fallback for the N-body piece: one period of the figure-eight three-body orbit.
+import { toSvgPath } from '../lib/curves.ts';
+import { FIGURE_EIGHT, FIGURE_EIGHT_PERIOD, step } from '../lib/nbody.ts';
+
+const width = 640;
+const height = 400;
+const scale = 230;
+let state = FIGURE_EIGHT;
+const path = [];
+const dt = FIGURE_EIGHT_PERIOD / 600;
+for (let i = 0; i <= 600; i++) {
+  path.push({ x: width / 2 + state[0].x * scale, y: height / 2 + state[0].y * scale });
+  state = step(state, dt, { softening: 0 });
+}
+const d = toSvgPath(path, { closed: true });
+const dots = FIGURE_EIGHT.map((b) => ({ x: Math.round(width / 2 + b.x * scale), y: Math.round(height / 2 + b.y * scale) }));
+---
+
+<svg class="nbody-fallback" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="nbody-fallback-title">
+  <title id="nbody-fallback-title">Three equal masses chasing each other around a figure-eight orbit</title>
+  <path d={d}></path>
+  {dots.map((p) => <circle cx={p.x} cy={p.y} r="8"></circle>)}
+</svg>
+
+<style>
+  .nbody-fallback {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+  }
+
+  path {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 2;
+  }
+
+  circle {
+    fill: var(--color-accent);
+  }
+</style>

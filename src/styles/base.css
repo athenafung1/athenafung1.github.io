@@ -251,3 +251,78 @@
     animation-timing-function: var(--ease);
   }
 }
+
+/* Shared controls for interactive pieces on /fun/ (Svelte islands use these global classes). */
+@layer components {
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-s) var(--space-l);
+  }
+
+  .controls__group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+  }
+
+  .chip {
+    min-width: var(--tap);
+    min-height: var(--tap);
+    padding: 0 1em;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .chip[aria-pressed='true'] {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  .range {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    flex: 1 1 12rem;
+    min-height: var(--tap);
+  }
+
+  .range input {
+    flex: 1;
+    min-width: 6rem;
+    height: var(--tap);
+    margin: 0;
+    accent-color: var(--color-accent);
+  }
+
+  .range output {
+    min-width: 3ch;
+    font-variant-numeric: tabular-nums;
+    text-align: end;
+  }
+
+  .piece-canvas {
+    display: block;
+    width: 100%;
+    border-radius: var(--radius-m);
+    background: var(--color-bg);
+  }
+
+  .piece-status {
+    margin: 0;
+    font-size: var(--step--1);
+    color: var(--color-muted);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .piece-body {
+    display: grid;
+    gap: var(--space-s);
+  }
+}

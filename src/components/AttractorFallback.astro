@@ -1,0 +1,35 @@
+---
+// Build-time fallback for the attractor piece: the Lorenz butterfly projected at a fixed angle.
+import { toSvgPath } from '../lib/curves.ts';
+import { ATTRACTORS, centre, project, trajectory, upright } from '../lib/attractors.ts';
+
+const width = 640;
+const height = 400;
+const lorenz = ATTRACTORS[0];
+const points = centre(upright(trajectory(lorenz.f, lorenz.start, lorenz.dt, 6000, 600), lorenz.up));
+const radius = Math.max(...points.map((p) => Math.hypot(p[0], p[1], p[2])));
+const s = (height * 0.46) / radius;
+const projected = project(points.filter((_, i) => i % 3 === 0), 0.6, 0.32).map((p) => ({ x: width / 2 + p.x * s, y: height / 2 + p.y * s }));
+const d = toSvgPath(projected);
+---
+
+<svg class="attractor-fallback" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="attractor-fallback-title">
+  <title id="attractor-fallback-title">The Lorenz attractor: a butterfly-shaped tangle traced by a chaotic but deterministic system</title>
+  <path d={d}></path>
+</svg>
+
+<style>
+  .attractor-fallback {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+  }
+
+  path {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 0.8;
+    opacity: 0.8;
+  }
+</style>
