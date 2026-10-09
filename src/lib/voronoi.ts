@@ -2,8 +2,30 @@
 // "closer to me than to site j" half-plane. O(n²·k), plenty fast for a few dozen sites.
 import type { Point } from './curves.ts';
 
-export function randomSites(n: number, width: number, height: number, rand: () => number): Point[] {
-  return Array.from({ length: n }, () => ({ x: rand() * width, y: rand() * height }));
+/**
+ * n random sites in the box. With minDistance > 0, a candidate closer than that to an existing site
+ * is rejected and redrawn (dart throwing, a cheap Poisson-disc sample). Cells then come out evenly
+ * sized, like cells in tissue, and no two dots land on top of each other, which would put the edge
+ * between their cells right beside both. If no valid spot turns up in 30 tries, the candidate
+ * farthest from its neighbours is kept, so exactly n sites always come back.
+ */
+export function randomSites(n: number, width: number, height: number, rand: () => number, minDistance = 0): Point[] {
+  const sites: Point[] = [];
+  const gap = (p: Point) => sites.reduce((min, s) => Math.min(min, Math.hypot(s.x - p.x, s.y - p.y)), Infinity);
+  for (let i = 0; i < n; i++) {
+    let best = { x: rand() * width, y: rand() * height };
+    let bestGap = gap(best);
+    for (let tries = 1; tries < 30 && bestGap < minDistance; tries++) {
+      const candidate = { x: rand() * width, y: rand() * height };
+      const candidateGap = gap(candidate);
+      if (candidateGap > bestGap) {
+        best = candidate;
+        bestGap = candidateGap;
+      }
+    }
+    sites.push(best);
+  }
+  return sites;
 }
 
 /** Keep the part of `polygon` on the side of the perpendicular bisector closer to `a` than `b`. */

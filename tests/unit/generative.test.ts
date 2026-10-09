@@ -25,6 +25,23 @@ describe('voronoiCells', () => {
   const sites = randomSites(40, 1200, 140, mulberry32(7));
   const cells = voronoiCells(sites, 1200, 140);
 
+  it('keeps sites at least minDistance apart when asked, without changing the default', () => {
+    for (const seed of [11, 23, 41, 53, 37]) {
+      const spaced = randomSites(44, 1200, 120, mulberry32(seed), 28);
+      expect(spaced).toHaveLength(44);
+      for (let i = 0; i < spaced.length; i++) {
+        expect(spaced[i].x).toBeGreaterThanOrEqual(0);
+        expect(spaced[i].y).toBeLessThanOrEqual(120);
+        for (let j = i + 1; j < spaced.length; j++) {
+          expect(Math.hypot(spaced[i].x - spaced[j].x, spaced[i].y - spaced[j].y)).toBeGreaterThanOrEqual(28);
+        }
+      }
+    }
+    // minDistance 0 draws exactly what it always did.
+    const a = mulberry32(5);
+    expect(randomSites(10, 100, 100, mulberry32(5))).toEqual(Array.from({ length: 10 }, () => ({ x: a() * 100, y: a() * 100 })));
+  });
+
   it('partitions the box: cell areas sum to its area', () => {
     const total = cells.reduce((sum, cell) => sum + Math.abs(polygonArea(cell)), 0);
     expect(total).toBeCloseTo(1200 * 140, 4);

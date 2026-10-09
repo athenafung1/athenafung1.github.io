@@ -17,6 +17,15 @@ import MonteCarloPi from '../islands/MonteCarloPi.svelte';
 import Automaton from '../islands/Automaton.svelte';
 import VoronoiDivider from '../islands/VoronoiDivider.svelte';
 import FunFacts from '../islands/FunFacts.svelte';
+import HopfieldMemory from '../islands/HopfieldMemory.svelte';
+import Cochlea from '../islands/Cochlea.svelte';
+import TopologyOptimizer from '../islands/TopologyOptimizer.svelte';
+import RegeneratingMark from '../islands/RegeneratingMark.svelte';
+import DiffusionForward from '../islands/DiffusionForward.svelte';
+import AttentionByHand from '../islands/AttentionByHand.svelte';
+import OptimiserRace from '../islands/OptimiserRace.svelte';
+import NeuralPlayground from '../islands/NeuralPlayground.svelte';
+import { rose, normalizeToViewBox } from '../lib/curves.ts';
 import { PIECES } from '../islands/pieces.ts';
 import { countWords } from '../lib/content-rules.ts';
 
@@ -30,6 +39,11 @@ for (const entry of interests) {
   const words = countWords(entry.body ?? '');
   if (words < 1 || words > 150) throw new Error(`${file}: the write-up is ${words} words; keep it between 1 and 150.`);
 }
+
+// Static fallback for the neural cellular automaton: the filled three-petal rose it learned to grow.
+const markPath = `M${normalizeToViewBox(rose(3, 241), 200, 200, 14)
+  .map((p) => `${(100 + (p.y - 100)).toFixed(1)} ${(200 - p.x).toFixed(1)}`)
+  .join(' L')} Z`;
 
 const piece = (id: string) => {
   const found = PIECES.find((p) => p.id === id);
@@ -101,6 +115,63 @@ const piece = (id: string) => {
       <MonteCarloPi client:visible>
         <p class="piece-status">Random points in a unit square: about π/4 of them land inside the quarter circle.</p>
       </MonteCarloPi>
+    </PieceFrame>
+
+    <div class="pieces__group">
+      <p class="label">Biology × engineering</p>
+      <VoronoiDivider seed={41} client:visible />
+    </div>
+
+    <PieceFrame {...piece('hopfield')}>
+      <HopfieldMemory client:visible />
+    </PieceFrame>
+
+    <PieceFrame {...piece('cochlea')}>
+      <Cochlea client:visible />
+    </PieceFrame>
+
+    <PieceFrame {...piece('bone')} fallback="description">
+      <TopologyOptimizer client:visible>
+        <p class="piece-status">
+          A block of material, a support and a load: the optimiser removes material that carries little stress and keeps what the load
+          path needs, ending in a truss of struts like trabecular bone.
+        </p>
+      </TopologyOptimizer>
+    </PieceFrame>
+
+    <div class="pieces__group">
+      <p class="label">AI × ML</p>
+      <VoronoiDivider seed={53} client:visible />
+    </div>
+
+    <PieceFrame {...piece('nca')}>
+      <RegeneratingMark client:visible>
+        <svg class="nca-fallback" viewBox="0 0 200 200" role="img" aria-label="A three-petal rose">
+          <path d={markPath}></path>
+        </svg>
+      </RegeneratingMark>
+    </PieceFrame>
+
+    <PieceFrame {...piece('diffusion')} fallback="description">
+      <DiffusionForward client:visible>
+        <p class="piece-status">The site’s curve dissolving step by step into Gaussian noise: the forward half of a diffusion model.</p>
+      </DiffusionForward>
+    </PieceFrame>
+
+    <PieceFrame {...piece('attention')}>
+      <AttentionByHand client:visible />
+    </PieceFrame>
+
+    <PieceFrame {...piece('optimisers')} fallback="description">
+      <OptimiserRace client:visible>
+        <p class="piece-status">Three optimisers descending a loss surface from the same starting point, each leaving a trail.</p>
+      </OptimiserRace>
+    </PieceFrame>
+
+    <PieceFrame {...piece('neural-net')} fallback="description">
+      <NeuralPlayground client:visible>
+        <p class="piece-status">A small neural network learning, live, to separate two classes of points.</p>
+      </NeuralPlayground>
     </PieceFrame>
 
     <PieceFrame {...piece('automata')} fallback="description">
@@ -176,6 +247,21 @@ const piece = (id: string) => {
   .pieces {
     display: grid;
     gap: var(--space-xl);
+  }
+
+  .nca-fallback {
+    display: block;
+    width: 100%;
+    max-width: 16rem;
+  }
+
+  .nca-fallback path {
+    fill: var(--color-accent);
+  }
+
+  .pieces__group {
+    display: grid;
+    gap: var(--space-2xs);
   }
 
   .pieces > :global(.piece) {

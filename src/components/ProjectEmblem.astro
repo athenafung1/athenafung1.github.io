@@ -1,0 +1,43 @@
+---
+// A project's generated emblem (src/lib/emblem.ts), computed at build time as one SVG path.
+// Decorative. The view-transition name pairs the card's emblem with the detail page's, so it morphs
+// between them when page transitions are on.
+import { emblemParams, emblemPoints } from '../lib/emblem.ts';
+
+interface Props {
+  /** The project's slug; the same slug always draws the same emblem. */
+  seed: string;
+  class?: string;
+}
+
+const { seed, class: className } = Astro.props;
+const d = `M${emblemPoints(emblemParams(seed), 900)
+  .map((p) => `${p.x.toFixed(3)} ${p.y.toFixed(3)}`)
+  .join(' L')}`;
+---
+
+<svg
+  class:list={['emblem', className]}
+  viewBox="-1.05 -1.05 2.1 2.1"
+  aria-hidden="true"
+  focusable="false"
+  style={`view-transition-name: emblem-${seed}`}
+>
+  <path d={d}></path>
+</svg>
+
+<style>
+  .emblem {
+    display: block;
+    aspect-ratio: 1;
+    overflow: visible;
+  }
+
+  path {
+    fill: none;
+    stroke: var(--color-curve);
+    stroke-width: 1;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+</style>

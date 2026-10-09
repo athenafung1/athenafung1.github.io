@@ -325,4 +325,66 @@
     display: grid;
     gap: var(--space-s);
   }
+
+  /* Margin annotation: a short note set beside the line it annotates on wide screens, joined to the
+     text by a hairline leader like a callout on a drawing; an inline callout on narrower ones. Write
+     it inside a paragraph, straight after the words it is about:
+       …pooled in one place.<span class="margin-note"><b>Why it mattered</b> …</span>
+     Wide screens float it into the right margin with a negative margin the size of the note (the
+     Tufte sidenote technique), so the paragraph's lines keep their full length. */
+  .margin-note {
+    display: block;
+    margin-block: var(--space-xs);
+    padding-inline-start: var(--space-s);
+    border-inline-start: 2px solid var(--color-accent);
+    font-size: var(--step--1);
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+
+  .margin-note b {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: 600;
+    color: var(--color-accent);
+  }
+
+  @media (min-width: 72rem) {
+    .margin-note {
+      --note-width: 15rem;
+      --note-gap: var(--space-xl);
+      position: relative;
+      float: right;
+      clear: right;
+      width: var(--note-width);
+      margin-block: 0.15em 0;
+      margin-inline-end: calc(-1 * (var(--note-width) + var(--note-gap)));
+      padding-inline-start: 0;
+      border-inline-start: 0;
+      rotate: -0.8deg; /* set by hand, a touch off square */
+    }
+
+    /* Leader: a hairline from the note back across the gap, ending in a dot at the text column. */
+    .margin-note::before,
+    .margin-note::after {
+      content: '';
+      position: absolute;
+      inset-inline-start: calc(var(--space-xs) - var(--note-gap));
+    }
+
+    .margin-note::before {
+      inset-block-start: 0.8em;
+      width: calc(var(--note-gap) - var(--space-xs) - var(--space-2xs));
+      border-block-start: 1px solid var(--color-border);
+    }
+
+    .margin-note::after {
+      inset-block-start: calc(0.8em - 2px);
+      width: 5px;
+      height: 5px;
+      margin-inline-start: -2.5px;
+      border-radius: 50%;
+      background: var(--color-accent);
+    }
+  }
 }

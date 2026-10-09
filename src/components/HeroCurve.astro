@@ -1,32 +1,35 @@
 ---
-// Landing-hero signature (research R11): a damped rotary harmonograph computed at build time,
-// shipped as one inline SVG path and drawn once with CSS. No JavaScript; decorative only.
-import { harmonograph, normalizeToViewBox, toSvgPath, type HarmonographParams } from '../lib/curves.ts';
+// Landing-hero signature (research R11; "hero" is the large banner at the top of a landing page): the
+// five-petal harmonograph that matches the site mark (HERO_HARMONOGRAPH in src/lib/curves.ts), given
+// depth by twisting each petal like a propeller blade (src/lib/hero3d.ts). A harmonograph is the
+// figure a pen draws when pendulums swing it around: x(t) and y(t) are sums of sine waves that slowly
+// die away.
+//
+// The build projects the 3-D curve at a resting tilt into one inline SVG path. Without JavaScript the
+// path draws itself once with CSS; with reduced motion it simply appears. Otherwise a canvas takes
+// over and plays three acts: points start as Gaussian noise and follow a diffusion model's noise
+// schedule backwards onto the curve (src/lib/diffusion.ts); a pen traces the outline, picking the dots
+// up as it passes; then the finished curve stays, nearer lines drawn stronger. On the wide layout it
+// spins like a pinwheel, about its own axle, while the pointer is over it; dragging twirls it, and a
+// fling keeps it spinning before it coasts back to the hover spin or to a stop.
+import { project } from '../lib/attractors.ts';
+import { toSvgPath } from '../lib/curves.ts';
+import { REST_PITCH, REST_YAW, heroPoints, radius } from '../lib/hero3d.ts';
 
 interface Props {
-  params?: HarmonographParams;
   samples?: number;
   class?: string;
 }
 
-const defaultParams: HarmonographParams = {
-  x: [
-    { amplitude: 1, frequency: 2, phase: Math.PI / 2 },
-    { amplitude: 0.7, frequency: 5.006, phase: 0 },
-  ],
-  y: [
-    { amplitude: 1, frequency: 2, phase: 0 },
-    { amplitude: 0.7, frequency: 5.006, phase: Math.PI / 2 },
-  ],
-  damping: 0.03,
-  duration: 70,
-};
-
-const { params = defaultParams, samples = 1800, class: className } = Astro.props;
+const { samples = 1800, class: className } = Astro.props;
 const size = 600;
-const d = toSvgPath(normalizeToViewBox(harmonograph(params, samples), size, size, 12));
+const points = heroPoints(samples);
+// Scale by the 3-D radius rather than today's outline, so the curve fits at every angle it turns to.
+const scale = (size / 2 - 12) / radius(points);
+const d = toSvgPath(project(points, REST_YAW, REST_PITCH).map((p) => ({ x: size / 2 + p.x * scale, y: size / 2 + p.y * scale })));
 ---
 
+<div class="hero-curve-wrap" data-samples={samples}>
 <svg
   class:list={['hero-curve', className]}
   viewBox={`0 0 ${size} ${size}`}
@@ -36,6 +39,196 @@ const d = toSvgPath(normalizeToViewBox(harmonograph(params, samples), size, size
 >
   <path d={d} pathLength="1"></path>
 </svg>
+</div>
+<script is:inline>
+  // Before first paint: opt into the animated version (skip it for reduced motion). Doing this
+  // inline, ahead of the deferred module below, keeps the CSS-drawn stroke from flashing first.
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.currentScript.previousElementSibling.classList.add('is-denoising');
+</script>
+<script>
+  import { project, type Vec3 } from '../lib/attractors.ts';
+  import { cosineAlphaBars, gaussians, STEPS } from '../lib/diffusion.ts';
+  import { REST_PITCH, REST_YAW, heroPoints, lengthFractions, radius, resample, rollAbout } from '../lib/hero3d.ts';
+  import { mulberry32 } from '../lib/random.ts';
+  import { createLoop, fitCanvas, watchTheme } from '../islands/canvas-kit.ts';
+
+  // 1. Denoise, as reverse diffusion with the answer known: dots spaced evenly along the curve (x₀)
+  //    each get a fixed Gaussian offset (ε) and are drawn at x_t = √ᾱ_t·x₀ + √(1−ᾱ_t)·ε as t runs
+  //    from T down to 0 on an ease-out clock, landing exactly on the curve. A trained model would
+  //    have to predict ε at every step; here it is simply known.
+  // 2. Hold briefly, then trace: the curve is drawn up to the pen's position along its length, and
+  //    each dot disappears as the pen reaches it (dots and pen share the same length fractions).
+  // 3. Rest, then spin like a pinwheel: the flower turns about its axle (rollAbout) while the view
+  //    keeps its resting tilt. Spin speed eases toward SPIN while the pointer is over the curve and
+  //    coasts back to 0 when it leaves. Dragging twirls it: the change in the pointer's angle around
+  //    the hub is added to the spin, and letting go mid-twirl hands that angular speed over as a
+  //    fling, which then eases as above. The loop sleeps once the curve is still.
+  const DENOISE = 2600;
+  const HOLD = 250;
+  const TRACE = 2200;
+  const DOTS = 1100;
+  const SPIN = 0.9; // radians per second while hovered: clockwise, so the petal fans trail
+  const EASE = 0.35; // seconds to reach the hover spin
+  const COAST = 0.9; // seconds for a fling, or the spin after the pointer leaves, to wind down
+  const HUB = 12; // px around the hub where the twirl angle is too jumpy to use
+  const BANDS = 12; // depth bands: nearer lines are drawn stronger
+  const alphaBars = cosineAlphaBars();
+
+  for (const wrap of document.querySelectorAll<HTMLElement>('.hero-curve-wrap.is-denoising')) {
+    const path = wrap.querySelector('path')!;
+    const curve = heroPoints(Number(wrap.dataset.samples) || 1800);
+    const R = radius(curve);
+    const at = lengthFractions(curve);
+    const dots = resample(curve, at, DOTS);
+    const eps = gaussians(2 * DOTS, mulberry32(7));
+    const canvas = document.createElement('canvas');
+    canvas.className = 'hero-curve-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    wrap.append(canvas);
+    wrap.classList.add('is-canvas');
+    const ctx = canvas.getContext('2d')!;
+
+    let width = 0;
+    let dpr = 1;
+    let colour = '';
+    let elapsed = 0;
+    let roll = 0;
+    let speed = 0;
+    let hovered = false;
+    let drag: { angle: number | null; t: number } | null = null;
+    let dragSpeed = 0; // smoothed angular speed during a twirl, for the fling
+    const introDone = () => elapsed >= DENOISE + HOLD + TRACE;
+    // The same mapping as the build: viewBox 600 with the curve's radius at 288 units.
+    const toScreen = (v: number) => width / 2 + v * ((width * 0.48) / R);
+
+    function drawCurve(points: Vec3[], upto: number) {
+      const proj = project(rollAbout(points, roll), REST_YAW, REST_PITCH);
+      let dmin = Infinity;
+      let dmax = -Infinity;
+      for (const p of proj) {
+        dmin = Math.min(dmin, p.depth);
+        dmax = Math.max(dmax, p.depth);
+      }
+      const bands = Array.from({ length: BANDS }, () => new Path2D());
+      for (let i = 1; i < proj.length && at[i - 1] < upto; i++) {
+        const a = proj[i - 1];
+        let b = proj[i];
+        if (at[i] > upto) {
+          // Partial last segment: stop exactly where the pen is.
+          const t = (upto - at[i - 1]) / (at[i] - at[i - 1]);
+          b = { x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, depth: a.depth + (b.depth - a.depth) * t };
+        }
+        const near = ((a.depth + b.depth) / 2 - dmin) / (dmax - dmin || 1);
+        const band = bands[Math.min(BANDS - 1, Math.floor(near * BANDS))];
+        band.moveTo(toScreen(a.x), toScreen(a.y));
+        band.lineTo(toScreen(b.x), toScreen(b.y));
+      }
+      ctx.lineWidth = (1.15 * width) / 600;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = colour;
+      bands.forEach((band, k) => {
+        ctx.globalAlpha = 0.25 + (0.75 * (k + 0.5)) / BANDS;
+        ctx.stroke(band);
+      });
+    }
+
+    function draw() {
+      if (!width || !colour) return;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, width, width);
+      const denoise = Math.min(1, elapsed / DENOISE);
+      const trace = Math.max(0, Math.min(1, (elapsed - DENOISE - HOLD) / TRACE));
+      const drawn = trace < 0.5 ? 2 * trace * trace : 1 - (2 - 2 * trace) ** 2 / 2; // ease in and out
+      if (drawn > 0) drawCurve(curve, drawn);
+      if (drawn >= 1) return;
+      // Dots ahead of the pen, still settling out of the noise if the denoise is not finished.
+      const a = alphaBars[Math.round((1 - denoise) ** 3 * STEPS)];
+      const signal = Math.sqrt(a);
+      const noise = Math.sqrt(1 - a) * 0.9; // slightly under unit noise keeps the start cloud in frame
+      const proj = project(rollAbout(dots.points, roll), REST_YAW, REST_PITCH);
+      const unit = (width * 0.48) / R / (width / 2); // curve units → [−1, 1] around the centre
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = colour;
+      const dot = Math.max(1.5, width / 300);
+      for (let i = 0; i < DOTS; i++) {
+        if (dots.at[i] <= drawn) continue;
+        const x = signal * proj[i].x * unit + noise * eps[2 * i];
+        const y = signal * proj[i].y * unit + noise * eps[2 * i + 1];
+        ctx.fillRect((width / 2) * (1 + x) - dot / 2, (width / 2) * (1 + y) - dot / 2, dot, dot);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    const loop = createLoop(wrap, (ms) => {
+      if (!introDone()) elapsed = Math.min(elapsed + ms, DENOISE + HOLD + TRACE);
+      if (introDone() && !drag) {
+        speed += ((hovered ? SPIN : 0) - speed) * Math.min(1, ms / 1000 / (hovered ? EASE : COAST));
+        roll += (speed * ms) / 1000;
+        // Below 0.01 rad/s the turn is invisible, so stop there.
+        if (!hovered && Math.abs(speed) < 0.01) {
+          speed = 0;
+          loop.setPlaying(false);
+        }
+      }
+      draw();
+    });
+    wrap.addEventListener('pointerenter', () => {
+      hovered = true;
+      loop.setPlaying(true);
+    });
+    wrap.addEventListener('pointerleave', () => (hovered = false));
+    // The pointer's angle around the hub (the canvas centre), or null too close to the hub to be stable.
+    const angleAround = (event: PointerEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const dx = event.clientX - (rect.left + rect.width / 2);
+      const dy = event.clientY - (rect.top + rect.height / 2);
+      return Math.hypot(dx, dy) < HUB ? null : Math.atan2(dy, dx);
+    };
+    wrap.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      event.preventDefault(); // no text selection while dragging
+      wrap.setPointerCapture(event.pointerId);
+      drag = { angle: angleAround(event), t: event.timeStamp };
+      dragSpeed = 0;
+      speed = 0; // grabbing it stops it, like a hand on a pinwheel
+      wrap.classList.add('is-dragging');
+      loop.setPlaying(true);
+    });
+    wrap.addEventListener('pointermove', (event) => {
+      if (!drag) return;
+      const angle = angleAround(event);
+      if (angle === null) return;
+      if (drag.angle !== null) {
+        // Shortest way round, so crossing the ±π seam doesn't read as a full turn.
+        const turn = Math.atan2(Math.sin(angle - drag.angle), Math.cos(angle - drag.angle));
+        roll += turn;
+        dragSpeed = 0.6 * dragSpeed + (0.4 * turn) / (Math.max(1, event.timeStamp - drag.t) / 1000);
+      }
+      drag = { angle, t: event.timeStamp };
+    });
+    const release = (event: PointerEvent) => {
+      if (!drag) return;
+      // Fling: keep the twirl's angular speed, unless the pointer was held still before letting go.
+      const flung = event.type === 'pointerup' && event.timeStamp - drag.t < 80;
+      speed = flung ? Math.max(-8, Math.min(8, dragSpeed)) : 0;
+      drag = null;
+      wrap.classList.remove('is-dragging');
+      loop.setPlaying(true);
+    };
+    wrap.addEventListener('pointerup', release);
+    wrap.addEventListener('pointercancel', release);
+    watchTheme(wrap, () => {
+      colour = getComputedStyle(path).stroke;
+      draw();
+    });
+    fitCanvas(canvas, (w, _h, ratio) => {
+      width = w;
+      dpr = ratio;
+      draw();
+    });
+    loop.setPlaying(true);
+  }
+</script>
 
 <style>
   .hero-curve {
@@ -66,6 +259,50 @@ const d = toSvgPath(normalizeToViewBox(harmonograph(params, samples), size, size
     path {
       animation: none;
       stroke-dashoffset: 0;
+    }
+  }
+
+  .hero-curve-wrap {
+    position: relative;
+  }
+
+  /* Animated mode: the SVG stroke stays hidden while the canvas draws. The delayed reveal is a
+     safety net in case the script never runs; once the canvas takes over (is-canvas) it is cancelled. */
+  .hero-curve-wrap.is-denoising path {
+    animation: hero-reveal 0.6s ease 6s forwards;
+    stroke-dashoffset: 0;
+    opacity: 0;
+  }
+
+  /* Twirlable once the canvas takes over (pointer events only reach it on the wide layout). Touch
+     keeps vertical swipes for scrolling the page; sideways swipes twirl the curve. */
+  .hero-curve-wrap.is-canvas {
+    cursor: grab;
+    touch-action: pan-y;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .hero-curve-wrap.is-dragging {
+    cursor: grabbing;
+  }
+
+  .hero-curve-wrap.is-canvas path {
+    animation: none;
+    opacity: 0;
+  }
+
+  .hero-curve-wrap :global(.hero-curve-canvas) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  @keyframes hero-reveal {
+    to {
+      opacity: 1;
     }
   }
 </style>
