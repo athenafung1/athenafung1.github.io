@@ -14,12 +14,27 @@ author:
     DRAFT: a second paragraph about what drives you, outside the resume.
   education:
     - institution: University of Illinois Urbana-Champaign
-      credential: "DRAFT: degree and major (the old site said Computer Science)"
-      period: "DRAFT: years"
+      credential: "Master of Computer Science"
+      period: "Jan 2024 - Dec 2024"
+    - institution: University of Illinois Urbana-Champaign
+      credential: "B.S. Computer Science"
+      period: "Aug 2020 - Dec 2023"
   experience:
-    - organization: "DRAFT: organization"
-      title: "DRAFT: role title"
-      period: "DRAFT: period"
+    - organization: "NVIDIA"
+      title: "Systems Performance Engineer"
+      period: "2025 - Present"
+      summary: "DRAFT: one or two sentences about the work and its impact."
+    - organization: "NVIDIA"
+      title: "Systems Performance Engineer Intern, Applied Systems Engineering at Scale"
+      period: "Summer 2024"
+      summary: "DRAFT: one or two sentences about the work and its impact."
+    - organization: "Google"
+      title: "Software Engineer Intern, Google Cloud Platform/Technical Infrastructure"
+      period: "Summer 2023"
+      summary: "DRAFT: one or two sentences about the work and its impact."
+    - organization: "Uber"
+      title: "Software Engineer Intern, Core Infrastructure Foundations"
+      period: "Summer 2022"
       summary: "DRAFT: one or two sentences about the work and its impact."
   skills:
     - group: Languages
