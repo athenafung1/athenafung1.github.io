@@ -18,9 +18,11 @@ Within that stack, adopt two techniques that make the site stand out without add
 
 1. **Native cross-document view transitions** (CSS only, R17) for editorial page-to-page motion.
 2. **Math computed at build time**: the landing-hero curve and every interactive piece's static
-   fallback are generated in Astro frontmatter from the same `src/lib/` functions the islands use
-   at runtime (R11, R12). The math is the visual identity, and it costs zero client JavaScript on
-   content pages.
+   fallback are generated in Astro frontmatter from the same `src/lib/` functions the islands and
+   the hero script use at runtime (R11, R12). The math is the visual identity, and content pages
+   need no client JavaScript to show it. The one addition is the landing hero's motion: a vanilla
+   script of about 3.4 KB gzipped that animates the build-time curve when scripting and motion
+   are allowed (R11).
 
 **More interesting options, offered as additions rather than replacements**:
 
@@ -221,9 +223,10 @@ two families and the R10 font budget.
 | CSS (one shared file) | ≤ 25 KB | ≤ 25 KB | ≤ 25 KB | ≤ 25 KB | ≤ 25 KB |
 | Fonts (2 families, latin) | ≤ 150 KB | ≤ 150 KB | ≤ 150 KB | ≤ 150 KB | ≤ 150 KB |
 | JS (theme + eggs listener) | ≤ 3 KB | ≤ 3 KB | ≤ 3 KB | ≤ 3 KB | ≤ 3 KB |
+| JS (landing hero motion, R11) | ≤ 4 KB | 0 | 0 | 0 | 0 |
 | JS (Svelte runtime + pieces) | 0 | 0 | 0 | 0 | ≤ 60 KB |
 | Images, first view | ≤ 150 KB | ≤ 150 KB | ≤ 300 KB | ≤ 300 KB | ≤ 250 KB |
-| **Total at first load** | **≤ 370 KB** | **≤ 360 KB** | **≤ 520 KB** | **≤ 510 KB** | **≤ 530 KB** |
+| **Total at first load** | **≤ 380 KB** | **≤ 360 KB** | **≤ 520 KB** | **≤ 510 KB** | **≤ 530 KB** |
 
 Below-the-fold images use `loading="lazy"` and don't count toward first-load totals. The total
 transferred after a full scroll must still stay under 1 MB. Lighthouse CI asserts
@@ -232,16 +235,46 @@ text (name or page title), never an image.
 
 ## R11. Landing hero signature motion
 
-**Decision**: `HeroCurve.astro` computes a parametric curve at build time with `src/lib/curves.ts`
-(for example a rose curve r = cos(kθ) or a harmonograph-style sum of damped sinusoids, parameters
-chosen during design). It emits a single inline SVG `<path>` and animates `stroke-dashoffset`
-with CSS so the curve draws itself once. Under reduced motion the finished curve is shown
-statically. No JavaScript is used, and the SVG is `aria-hidden` with no layout dependency, so it
-never delays LCP (FR-022 limits prominent motion to this hero, the pieces, easter eggs, page transitions,
-and hover/focus).
+**Decision** (revised 2026-10-11; originally CSS only, with no JavaScript): `HeroCurve.astro`
+computes the five-petal harmonograph that matches the site mark (`HERO_HARMONOGRAPH` in
+`src/lib/curves.ts`) at build time. It gives the curve depth by twisting each petal like a
+pinwheel blade (`src/lib/hero3d.ts`) and emits it, at a resting tilt, as a single inline SVG
+`<path>`. That SVG is the baseline. Without JavaScript it draws itself once by animating
+`stroke-dashoffset` with CSS, and under reduced motion the finished curve is shown statically.
 
-**Alternatives considered**: a canvas or Svelte hero (JS on the most important page, LCP risk);
-Lottie or video (heavy, third-party runtime, against FR-022's no-autoplay-video rule).
+When JavaScript runs and motion is allowed, a small vanilla module script lays a canvas over the
+SVG. The script uses no Svelte. The canvas plays the signature motion once:
+- points start as Gaussian noise and follow a diffusion noise schedule back onto the curve
+  (`src/lib/diffusion.ts`)
+- a pen traces the outline
+- the curve rests
+
+On the wide layout the curve spins clockwise like a pinwheel while hovered and can be twirled with
+a drag or a fling. On phones, where it sits faded behind the text, it ignores touches so the page
+scrolls normally. The loop pauses off screen and sleeps once the curve is still
+(`src/islands/canvas-kit.ts`). If the script never runs, the SVG fades in after 6 s as a safety
+net.
+
+**Why it does not delay LCP**:
+- The SVG reserves the space and the canvas sits absolutely positioned over it, so nothing shifts.
+- Both are `aria-hidden`.
+- The script is a deferred module.
+- The LCP element stays the `<h1>` text.
+
+**Cost**: the script costs the landing page 5.6 KB raw, or 2.7 KB gzipped. It also pulls in the
+shared curve module, another 0.6 KB gzipped. Together that is about 3.4 KB, within its own
+≤ 4 KB row in R10. No other page loads it.
+
+FR-022 limits prominent motion to this hero, the pieces, easter eggs, page transitions, and
+hover/focus.
+
+**Alternatives considered**:
+- The CSS-only draw on its own: the original decision. It is kept as the fallback, but it could
+  not show the denoising or respond to the pointer.
+- A Svelte island: it would load the Svelte runtime on the landing page for one canvas.
+- WebGL or three.js: a dependency or a GPU fallback path for a single line drawing.
+- Lottie or video: heavy, needs a third-party runtime, and goes against FR-022's no-autoplay-video
+  rule.
 
 ## R12. First interactive piece
 
@@ -260,7 +293,7 @@ rewards play, works on touch, and its core logic is pure and testable.
 
 **Alternatives considered**: Game of Life (familiar, less personal); Mandelbrot via WebGL
 (spectacular, but needs a WebGL fallback path; proposed as the second piece, R1); Lissajous
-harmonograph (better as the CSS-only hero, R11).
+harmonograph (used for the landing hero instead, R11).
 
 ## R13. Testing strategy
 

@@ -6,11 +6,11 @@ import ThemeToggle from './ThemeToggle.astro';
 const author = await getEntry('profile', 'author');
 const name = author?.data.name ?? 'Athena Fung';
 
-// The site mark: a three-petal rose curve r = cos(3θ), one petal pointing up. Computed at build.
-const samples = 72;
+// The site mark: a five-petal rose curve r = cos(5θ), one petal pointing up. Computed at build.
+const samples = 120;
 const rose = Array.from({ length: samples }, (_, i) => {
   const t = (Math.PI * i) / samples;
-  const r = Math.cos(3 * t);
+  const r = Math.cos(5 * t);
   const angle = t - Math.PI / 2;
   return `${(r * Math.cos(angle)).toFixed(2)} ${(r * Math.sin(angle)).toFixed(2)}`;
 });

@@ -11,14 +11,16 @@ Projects, Fun) plus optional project detail pages. The site should be editorial 
 first, and work fully without JavaScript.
 
 **Astro 7** generates plain HTML at build time. That gives every page the shared layout,
-navigation, contact links, theme toggle and sharing tags without copying them (FR-030), while
-shipping no JavaScript to content pages (FR-027). Projects and Fun-page interests are Markdown
-files whose frontmatter the build validates against typed schemas (FR-009, FR-020, FR-032, FR-033).
+navigation, contact links, theme toggle and sharing tags without copying them (FR-030), and
+content and navigation work with no JavaScript (FR-027). Projects and Fun-page interests are
+Markdown files whose frontmatter the build validates against typed schemas (FR-009, FR-020,
+FR-032, FR-033).
 
 **Svelte 5** is used only for the Fun page's interactive math pieces and the site-wide easter
 eggs. Pieces load when they scroll into view; easter eggs load only when someone triggers one. The
-landing-hero motion is a curve computed at build time, shipped as inline SVG and animated with CSS
-only.
+landing hero is a curve computed at build time and shipped as inline SVG that draws itself with
+CSS. When scripting and motion are allowed, a small vanilla script (no Svelte) animates the same
+curve on a canvas: it denoises into place, is traced, and spins on hover (research R11).
 
 Build output goes to `dist/` (Astro's default), the published directory under constitution
 v1.3.0. **No existing file is deleted or moved**: the hand-written `site/` stays in the repository
@@ -148,13 +150,15 @@ src/
 │   ├── SiteNav.astro       # renders nav.yaml, marks current page (aria-current)
 │   ├── ContactLinks.astro  # inline SVG icons + plain links
 │   ├── ThemeToggle.astro   # button, hidden until JS reveals it
-│   ├── HeroCurve.astro     # build-time parametric curve → inline SVG, CSS-animated
+│   ├── HeroCurve.astro     # build-time 3-D curve → inline SVG (CSS-drawn) + canvas motion script
 │   ├── ProjectCard.astro
+│   ├── ProjectEmblem.astro # per-project harmonograph emblem, seeded by the slug
 │   ├── InterestEntry.astro
 │   ├── Picture.astro       # wrapper over astro:assets <Picture> with alt rules
 │   └── PieceFrame.astro    # wraps an island: static fallback + <noscript> + lazy island
 ├── islands/                # Svelte 5 components: the ONLY place Svelte is used
 │   ├── FourierSketch.svelte
+│   ├── canvas-kit.ts       # vanilla canvas helpers: frame loop, resize, theme colours
 │   └── eggs/
 │       └── <EggName>.svelte
 ├── scripts/                # tiny vanilla client modules bundled by Astro
@@ -163,6 +167,10 @@ src/
 ├── lib/                    # pure, framework-free, unit-tested logic
 │   ├── fourier.ts          # DFT, epicycle ordering, path resampling
 │   ├── curves.ts           # parametric curves for HeroCurve and fallback SVGs
+│   ├── hero3d.ts           # hero curve in 3-D: petal twist, spin, projection, arc-length sampling
+│   ├── diffusion.ts        # noise schedule for the hero's denoise
+│   ├── emblem.ts           # project emblem parameters from a slug hash
+│   ├── random.ts           # seeded random generator
 │   ├── theme.ts            # resolveTheme(stored, systemPrefersDark)
 │   └── content-rules.ts    # sentence counting, detail-page heading checks, privacy patterns
 ├── pages/
@@ -189,7 +197,7 @@ scripts/
 └── check-content.mjs       # CI: scans dist/**/*.html for placeholders + phone/address patterns
 
 tests/
-└── unit/                   # Vitest: fourier, curves, theme, content-rules
+└── unit/                   # Vitest: one test file per src/lib logic module
 
 .github/workflows/
 ├── pages.yml               # deploy (modified: build step added)
@@ -203,8 +211,9 @@ archive/                    # unchanged
 **Structure Decision**: a single Astro project at the repository root. Svelte is confined to
 `src/islands/`, and all non-trivial logic lives in framework-free `src/lib/` so it can be
 unit-tested without a browser and reused between build-time Astro code (fallback SVGs, hero
-curve) and runtime Svelte islands. `site/`, `archive/` and `.specify/` are untouched and are
-never part of the build. No existing file in the repository is deleted or moved.
+curve, emblems) and code that runs in the browser (Svelte islands and the hero script). `site/`,
+`archive/` and `.specify/` are untouched and are never part of the build. No existing file in the
+repository is deleted or moved.
 
 ## Complexity Tracking
 

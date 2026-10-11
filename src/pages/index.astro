@@ -149,7 +149,7 @@ const featured = selectFeatured(await getCollection('projects'), 3);
     margin-block-start: var(--space-l);
   }
 
-  /* Phones: the curve sits behind the heading as a quiet watermark. */
+  /* Phones: the curve sits behind the heading as a quiet watermark that ignores the pointer. */
   .hero__art {
     position: absolute;
     inset-block-start: calc(-1 * var(--space-l));
@@ -157,6 +157,7 @@ const featured = selectFeatured(await getCollection('projects'), 3);
     width: min(75vw, 22rem);
     opacity: 0.2;
     z-index: 0;
+    pointer-events: none;
   }
 
   @media (min-width: 56rem) {
@@ -165,12 +166,14 @@ const featured = selectFeatured(await getCollection('projects'), 3);
       min-height: min(34rem, calc(100svh - 14rem));
     }
 
+    /* Wide screens: beside the text, and it spins while the pointer is over it. */
     .hero__art {
       position: static;
       width: 100%;
       max-width: 34rem;
       justify-self: end;
       opacity: 1;
+      pointer-events: auto;
     }
   }
 </style>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { harmonograph, normalizeToViewBox, rose, toSvgPath, type Point } from '../../src/lib/curves.ts';
+import { HERO_HARMONOGRAPH, harmonograph, normalizeToViewBox, rose, toSvgPath, type Point } from '../../src/lib/curves.ts';
 
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -56,6 +56,23 @@ describe('harmonograph', () => {
       100,
     );
     expect(distance(closed[0], closed[closed.length - 1])).toBeLessThan(1e-6);
+  });
+});
+
+describe('HERO_HARMONOGRAPH', () => {
+  const points = harmonograph(HERO_HARMONOGRAPH, 4000);
+  const radius = (p: Point) => Math.hypot(p.x, p.y);
+
+  it('starts and ends at the hub, so no petal is left half drawn', () => {
+    // At a hub the swings point in opposite directions: radius 1 − 0.95, shrunk by the damping.
+    expect(radius(points[0])).toBeCloseTo(0.05, 6);
+    expect(radius(points[points.length - 1])).toBeCloseTo(0.05 * Math.exp(-0.03 * HERO_HARMONOGRAPH.duration), 6);
+  });
+
+  it('draws its first petal pointing straight up (screen y grows downward)', () => {
+    const firstLobe = points.slice(0, 80);
+    const tip = firstLobe.reduce((best, p) => (radius(p) > radius(best) ? p : best));
+    expect(Math.atan2(tip.y, tip.x)).toBeCloseTo(-Math.PI / 2, 1);
   });
 });
 

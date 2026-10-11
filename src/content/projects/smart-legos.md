@@ -21,7 +21,7 @@ detailDescription: >-
 
 Smart buildings record a steady stream of occupancy and utility data, but that data usually stays
 inside each building. SmartLEGOs explores how building-level data could inform a smart-city view
-without first being pooled in one place.
+without first being pooled in one place.<span class="margin-note"><b>Why it mattered</b> DRAFT: one line on why keeping data inside each building mattered to you.</span>
 
 DRAFT: in a sentence or two, say why this mattered to you and what question the team set out to
 answer.
@@ -30,11 +30,11 @@ answer.
 
 The team modelled two buildings with different height and occupancy profiles and generated a
 synthetic dataset for each: one year of time-stamped occupancy, electricity, gas and water
-measurements at one-minute granularity.
+measurements at one-minute granularity.<span class="margin-note"><b>Design choice</b> DRAFT: why synthetic data, and what it could not tell you.</span>
 
 Each building runs as its own Flower SuperNode with access only to its own records, and a Flower
 Collaborative Agent works across both nodes in a shared federation. The nodes run in Docker
-Compose and authenticate to Flower's SuperGrid with their own key pairs:
+Compose and authenticate to Flower's SuperGrid with their own key pairs:<span class="margin-note"><b>What I'd change</b> DRAFT: one thing you would do differently next time.</span>
 
 ```shell
 mkdir keys

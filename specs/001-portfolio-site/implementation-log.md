@@ -146,6 +146,7 @@ Technical record of what was done during `/speckit-implement`, in order. Task ID
   polygonal on the outer petals at 1280px), normalised into a 600×600 viewBox, one `<path
   pathLength="1">` drawn by animating `stroke-dashoffset` 1 → 0 over `--dur-draw` (2.4 s, 0.15 s
   delay). `prefers-reduced-motion: reduce` → no animation, offset 0. `aria-hidden`, no JS.
+  (Later given a canvas motion script; see "After implementation" below.)
 - **T034** `src/pages/index.astro`: eyebrow label, `<h1>` name at `--step-display`, role line
   (Fraunces, muted), numbered strengths (`01`, `02` labels in small caps), primary "Get in
   touch" button (`mailto:`) + `<ContactLinks variant="compact">` so email/GitHub/LinkedIn are above
@@ -410,6 +411,57 @@ Technical record of what was done during `/speckit-implement`, in order. Task ID
 - **T082** NOT done: post-deploy checks (live routes, sharing previews, Enforce HTTPS, live
   Lighthouse, 5-second test) happen after merge.
 
+## After implementation: hero motion, site mark, emblems and margin notes
+
+Date 2026-10-11. Brought over from `test/interactive-demos` without the Fun-page demos; not tied to
+a task in tasks.md.
+
+- **Hero** (`HeroCurve.astro`, `src/lib/hero3d.ts`, `src/lib/diffusion.ts`): the curve is now the
+  five-petal `HERO_HARMONOGRAPH` in `curves.ts`, starting and ending at the hub so every petal is
+  closed, with each petal twisted into 3-D like a pinwheel blade. The build still emits T033's
+  CSS-drawn SVG, which is what shows without JavaScript or with reduced motion. Otherwise a vanilla
+  module script redraws it on a canvas:
+  - dots denoise onto the curve along a cosine noise schedule
+  - a pen traces the outline
+  - on the wide layout it spins clockwise while hovered and can be twirled with a fling
+  - on phones it ignores touches
+
+  This reverses T033's "no JS". Research R11 is revised, and R1, R10, R12 and plan.md are updated
+  to match.
+- **Site mark and favicon**: five-petal rose r = cos(5θ), 120 samples.
+- **Project emblems** (`ProjectEmblem.astro`, `src/lib/emblem.ts`): a harmonograph per project,
+  seeded by an FNV-1a hash of the slug. They appear on cards without an image and in the
+  case-study header.
+- **Margin notes**: `.margin-note` in `base.css` (beside the text at ≥ 72rem, inline callouts
+  below that). Three `DRAFT:` prompts are in `smart-legos.md`.
+- **Console greeting** in `src/scripts/eggs.ts`.
+- **Shared code**: `src/lib/random.ts` (mulberry32) and `src/islands/canvas-kit.ts` (frame loop,
+  resize, theme colours). `project()` and `Vec3` moved into `hero3d.ts`, so nothing comes from the
+  demo branch's attractor module. The `random` and `diffusion` tests are split out of the demo
+  suites into their own files.
+- **Measured** (`dist/`, gzip -9):
+
+  | Item | Size | R10 budget |
+  |---|---|---|
+  | Hero script | 2.7 KB | |
+  | Shared curves chunk it imports | 0.6 KB | |
+  | Hero script total | 3.4 KB | ≤ 4 KB |
+  | Theme + eggs | 2.3 KB | ≤ 3 KB |
+  | CSS | 3.1 KB | |
+  | Landing HTML | 27.2 KB (78.1 KB raw) | ≤ 40 KB |
+
+  Landing HTML was 17.5 KB at T079. The 3-D path and the card emblems account for the growth.
+- **Validation**:
+  - `npm test`: 85/85 in 10 files.
+  - `astro check`: 0 errors, 0 warnings, 0 hints. The build succeeds.
+  - `check-content`: only `DRAFT:` placeholders (32 lines, including the three new prompts and
+    the stand-in resume).
+  - Headless Chrome, hero: the canvas takes over on `/`.
+  - Headless Chrome, emblems: 48 px with no overflow at phone width.
+  - Headless Chrome, margin notes: they float right on the wide layout with no overflow.
+  - Headless Chrome, other pages: About and Fun load, with no console errors.
+  - Lighthouse not re-run.
+
 ## Open items for the author
 
 1. Replace every `DRAFT:` value: `src/data/profile.yaml`, `src/content/projects/*.md`
@@ -427,4 +479,6 @@ Technical record of what was done during `/speckit-implement`, in order. Task ID
 - Edited (required by tasks): `.gitignore` (appended), `.github/workflows/pages.yml` (build +
   upload `dist/`), `README.md` (rewritten for the build), `specs/001-portfolio-site/tasks.md`
   (checkboxes).
+- Edited after implementation (2026-10-11): `specs/001-portfolio-site/research.md` (R1, R10,
+  R11, R12) and `plan.md` (hero summary, source tree, structure note), to match the revised hero.
 - Deleted or moved: none. `site/` and `archive/` are byte-for-byte unchanged.

@@ -3,6 +3,7 @@
 // page through a stretched pseudo-element; external links stay clickable above it.
 import type { CollectionEntry } from 'astro:content';
 import Picture from './Picture.astro';
+import ProjectEmblem from './ProjectEmblem.astro';
 
 interface Props {
   project: CollectionEntry<'projects'>;
@@ -17,7 +18,7 @@ const detailHref = detail ? `/projects/${project.id}/` : undefined;
 const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Writeup', publication: 'Publication' } as const;
 ---
 
-<article class:list={['project-card', { 'project-card--image': image, 'project-card--linked': detailHref }]}>
+<article class:list={['project-card', { 'project-card--image': image, 'project-card--emblem': !image, 'project-card--linked': detailHref }]}>
   <div class="project-card__grid">
   {
     image && (
@@ -61,6 +62,7 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
       }
     </ul>
   </div>
+  {!image && <ProjectEmblem seed={project.id} class="project-card__emblem" />}
   </div>
 </article>
 
@@ -185,6 +187,47 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
 
   .project-card--linked:focus-within {
     outline: none;
+  }
+
+  /* Emblem: small in the top corner on narrow cards, beside the text on wide ones. It turns a
+     little on hover (hover motion is allowed by FR-022). It is a child component's root, which
+     scoped styles cannot reach, hence :global under the card's own class. */
+  .project-card--emblem .project-card__body {
+    padding-inline-end: 3.5rem;
+  }
+
+  .project-card :global(.project-card__emblem) {
+    position: absolute;
+    inset-block-start: var(--space-m);
+    inset-inline-end: 0;
+    width: 3rem;
+    opacity: 0.85;
+    transition:
+      rotate var(--dur-slow) var(--ease),
+      opacity var(--dur) var(--ease);
+  }
+
+  @media (hover: hover) {
+    .project-card--linked:hover :global(.project-card__emblem) {
+      opacity: 1;
+      rotate: 30deg;
+    }
+  }
+
+  @container (min-width: 40rem) {
+    .project-card--emblem .project-card__grid {
+      grid-template-columns: minmax(0, 1fr) 7.5rem;
+      align-items: center;
+    }
+
+    .project-card--emblem .project-card__body {
+      padding-inline-end: 0;
+    }
+
+    .project-card :global(.project-card__emblem) {
+      position: static;
+      width: 100%;
+    }
   }
 
   @container (min-width: 40rem) {
