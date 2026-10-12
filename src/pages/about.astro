@@ -3,10 +3,14 @@ import { existsSync, statSync } from 'node:fs';
 import { getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactLinks from '../components/ContactLinks.astro';
+import AboutTimeline from '../islands/about/AboutTimeline.svelte';
+import { buildEntries, toYears } from '../lib/timeline.ts';
 
 const author = await getEntry('profile', 'author');
 if (!author) throw new Error('src/data/profile.yaml must define `author`.');
-const { name, bio, seeking, location, education, experience, skills, resume, contact } = author.data;
+const { name, bio, seeking, location, skills, resume, contact } = author.data;
+// Education and experience as one dated timeline; ongoing roles end on the day of the build.
+const timeline = buildEntries(author.data, toYears(new Date()));
 
 // The downloadable resume must exist (FR-014); its size is shown next to the link.
 const resumeFile = `public${resume}`;
@@ -43,55 +47,13 @@ const paragraphs = bio
       </p>
     </section>
 
-    <section class="section" aria-labelledby="experience-title">
+    <!-- Newest first, the current role leading; the drawing beside it is the site's harmonograph,
+         one circle per entry, built up as the list scrolls from the first entry to now. -->
+    <section class="section" aria-labelledby="timeline-title">
       <div class="section-head">
-        <h2 id="experience-title">Work experience</h2>
+        <h2 id="timeline-title">Work and education</h2>
       </div>
-      <ol class="timeline" role="list">
-        {
-          experience.map((item) => (
-            <li class="timeline__item">
-              <p class="label timeline__period">{item.period}</p>
-              <div class="timeline__body">
-                <h3>
-                  {item.title}
-                  <span class="timeline__org">{item.organization}</span>
-                </h3>
-                <p>{item.summary}</p>
-                {item.highlights && (
-                  <ul class="timeline__highlights">
-                    {item.highlights.map((highlight) => (
-                      <li>{highlight}</li>
-                    ))}
-                  </ul>
-                )}
-              </div>
-            </li>
-          ))
-        }
-      </ol>
-    </section>
-
-    <section class="section" aria-labelledby="education-title">
-      <div class="section-head">
-        <h2 id="education-title">Education</h2>
-      </div>
-      <ol class="timeline" role="list">
-        {
-          education.map((item) => (
-            <li class="timeline__item">
-              <p class="label timeline__period">{item.period}</p>
-              <div class="timeline__body">
-                <h3>
-                  {item.credential}
-                  <span class="timeline__org">{item.institution}</span>
-                </h3>
-                {item.details && <p>{item.details}</p>}
-              </div>
-            </li>
-          ))
-        }
-      </ol>
+      <AboutTimeline client:visible entries={timeline} />
     </section>
 
     <!-- <section class="section" aria-labelledby="skills-title">
@@ -166,46 +128,6 @@ const paragraphs = bio
     margin-block-start: var(--space-2xl);
   }
 
-  .timeline {
-    display: grid;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .timeline__item {
-    display: grid;
-    gap: var(--space-3xs) var(--space-l);
-    padding-block: var(--space-m);
-    border-block-start: 1px solid var(--color-rule);
-  }
-
-  .timeline__body {
-    display: grid;
-    gap: var(--space-2xs);
-    max-width: var(--measure);
-  }
-
-  .timeline__body h3 {
-    display: grid;
-    gap: var(--space-3xs);
-  }
-
-  .timeline__org {
-    font-family: var(--font-text);
-    font-size: var(--step-0);
-    font-weight: 500;
-    color: var(--color-muted);
-  }
-
-  .timeline__highlights {
-    padding-inline-start: 1.1em;
-  }
-
-  .timeline__highlights li::marker {
-    color: var(--color-accent);
-  }
-
   .skills {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
@@ -244,15 +166,5 @@ const paragraphs = bio
     max-width: var(--measure);
     margin-block-end: var(--space-s);
     font-size: var(--step-1);
-  }
-
-  @media (min-width: 48rem) {
-    .timeline__item {
-      grid-template-columns: 11rem minmax(0, 1fr);
-    }
-
-    .timeline__period {
-      padding-block-start: 0.35em;
-    }
   }
 </style>

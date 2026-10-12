@@ -5,8 +5,9 @@ Personal portfolio site for Athena Fung.
 **Live at: https://athenafung1.github.io**
 
 Built with [Astro](https://astro.build) as a static site. Pages are plain HTML at runtime; the
-only JavaScript is a small theme/easter-egg script and, on the Fun page, a Svelte island for the
-interactive piece.
+only JavaScript is a small theme/easter-egg script and two Svelte islands: the interactive piece on
+the Fun page, and the work-and-education timeline on the About page (its list is plain HTML, so it
+reads the same without JavaScript).
 
 ## Repository layout
 
