@@ -10,9 +10,8 @@
   line-height: var(--leading-body);
 }
 
-/* Greens (Emerald, Forest, Sage): IBM Plex Sans Condensed for headings and labels, B612 for text.
-   Narrow headings over a wide, open text face, so the two read as clearly different voices.
-   Condensed letters are already tight, so headings drop the negative tracking. */
+/* Greens (Emerald, Forest, Sage): IBM Plex Sans Condensed throughout. Condensed letters are already
+   tight, so headings drop the negative tracking; labels are medium weight instead of small caps. */
 :is(:root[data-look^='green-'] body, [data-look-scope^='green-']) :is(h1, h2, h3, h4, .site-mark, .hero__name) {
   letter-spacing: 0;
 }

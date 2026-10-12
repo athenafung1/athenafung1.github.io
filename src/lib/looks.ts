@@ -31,10 +31,10 @@ export type Look = {
   dark: Palette;
 };
 
-// The three greens share everything but the green: IBM Plex Sans Condensed for headings and
-// labels, B612 for text, on the same cool grey paper.
-const GREEN_TYPE = 'IBM Plex Sans Condensed for headings and labels, B612 for text.';
-const GREEN_FONTS = { display: '--font-plex-cond', text: '--font-b612' };
+// The three greens share everything but the green: IBM Plex Sans Condensed throughout, on the same
+// cool grey paper.
+const GREEN_TYPE = 'IBM Plex Sans Condensed throughout: headings, labels and text.';
+const GREEN_FONTS = { display: '--font-plex-cond', text: '--font-plex-cond' };
 
 export const LOOKS: Look[] = [
   {
