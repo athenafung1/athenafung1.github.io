@@ -57,33 +57,23 @@ const isCurrent = (href: string) => path === href || (href !== '/' && path.start
     border-radius: var(--radius-m);
   }
 
-  a::after {
+  a[aria-current='page'] {
+    color: var(--color-text);
+  }
+
+  /* The underline marks the current page only; hovering just darkens the link. */
+  a[aria-current='page']::after {
     content: '';
     position: absolute;
     inset-inline: var(--space-2xs);
     inset-block-end: 0.45rem;
     height: 2px;
     background: var(--color-curve);
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--dur) var(--ease);
-  }
-
-  a[aria-current='page'] {
-    color: var(--color-text);
-  }
-
-  a[aria-current='page']::after {
-    transform: scaleX(1);
   }
 
   @media (hover: hover) {
     a:hover {
       color: var(--color-text);
-    }
-
-    a:hover::after {
-      transform: scaleX(1);
     }
   }
 

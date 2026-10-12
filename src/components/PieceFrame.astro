@@ -13,7 +13,6 @@ const { id, name, idea } = Astro.props;
 
 <section class="piece" id={id} aria-labelledby={`${id}-title`}>
   <div class="piece__head">
-    <p class="label">Play</p>
     <h2 id={`${id}-title`}>{name}</h2>
     <p class="piece__idea">{idea}</p>
   </div>

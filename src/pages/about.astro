@@ -28,7 +28,6 @@ const paragraphs = bio
   description={`About ${name}: background, education, experience and skills, with a downloadable resume.`}
 >
   <header class="about-head">
-    <p class="label">About</p>
     <h1 class="about-head__title">Hello, I’m {name.split(' ')[0]}.</h1>
     {location && <p class="label">Based in {location}</p>}
   </header>
@@ -39,15 +38,14 @@ const paragraphs = bio
       {seeking && <p class="about__seeking"><span class="label">Looking for</span> {seeking}</p>}
       <p>
         <a class="button button--primary" href={resume} download>
-          Download resume <span class="label resume-meta">PDF · {resumeSize}</span>
+          Download resume <span class="label resume-meta">PDF, {resumeSize}</span>
         </a>
       </p>
     </section>
 
     <section class="section" aria-labelledby="experience-title">
       <div class="section-head">
-        <p class="label">01</p>
-        <h2 id="experience-title">Work Experience</h2>
+        <h2 id="experience-title">Work experience</h2>
       </div>
       <ol class="timeline" role="list">
         {
@@ -76,7 +74,6 @@ const paragraphs = bio
 
     <section class="section" aria-labelledby="education-title">
       <div class="section-head">
-        <p class="label">02</p>
         <h2 id="education-title">Education</h2>
       </div>
       <ol class="timeline" role="list">
@@ -99,7 +96,6 @@ const paragraphs = bio
 
     <!-- <section class="section" aria-labelledby="skills-title">
       <div class="section-head">
-        <p class="label">03</p>
         <h2 id="skills-title">Skills</h2>
       </div>
       <dl class="skills">
@@ -122,7 +118,6 @@ const paragraphs = bio
 
     <!-- <section class="section contact-call" aria-labelledby="contact-title">
       <div class="section-head">
-        <p class="label">04</p>
         <h2 id="contact-title">Get in touch</h2>
       </div>
       <p class="contact-call__text">

@@ -8,10 +8,9 @@ import ProjectEmblem from './ProjectEmblem.astro';
 interface Props {
   project: CollectionEntry<'projects'>;
   headingLevel?: 2 | 3;
-  index?: number;
 }
 
-const { project, headingLevel = 2, index } = Astro.props;
+const { project, headingLevel = 2 } = Astro.props;
 const { title, summary, tech, links, image, period, detail } = project.data;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
 const detailHref = detail ? `/projects/${project.id}/` : undefined;
@@ -28,10 +27,7 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
     )
   }
   <div class="project-card__body">
-    <p class="label project-card__meta">
-      {index !== undefined && <span>№ {String(index + 1).padStart(2, '0')}</span>}
-      {period && <span>{period}</span>}
-    </p>
+    {period && <p class="label project-card__meta">{period}</p>}
     <Heading class="project-card__title">
       {detailHref ? <a href={detailHref}>{title}</a> : title}
     </Heading>
@@ -44,7 +40,7 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
         detailHref && (
           <li>
             <a class="project-card__more" href={detailHref} tabindex="-1" aria-hidden="true">
-              Read the case study <span class="button__arrow">→</span>
+              Read the case study
             </a>
           </li>
         )
@@ -89,7 +85,6 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
     width: 100%;
     aspect-ratio: 16 / 10;
     object-fit: cover;
-    transition: transform var(--dur-slow) var(--ease);
   }
 
   .project-card__body {
@@ -136,18 +131,16 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
   }
 
   .project-card__tech {
-    gap: var(--space-3xs) var(--space-xs);
+    gap: var(--space-3xs) 0.3em;
     font-size: var(--step--1);
     font-weight: 500;
     letter-spacing: 0.01em;
     color: var(--color-muted);
   }
 
-  /* Separator after each item, so a wrapped line never starts with a dot. */
+  /* A comma after each item but the last, so the list reads like a sentence. */
   .project-card__tech li:not(:last-child)::after {
-    content: '·';
-    margin-inline-start: var(--space-xs);
-    color: var(--color-border);
+    content: ',';
   }
 
   .project-card__links {
@@ -174,14 +167,6 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
   @media (hover: hover) {
     .project-card--linked:hover .project-card__title a {
       color: var(--color-accent);
-    }
-
-    .project-card--linked:hover .project-card__media :global(img) {
-      transform: scale(1.03);
-    }
-
-    .project-card--linked:hover .button__arrow {
-      transform: translateX(3px);
     }
   }
 

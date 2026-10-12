@@ -15,32 +15,22 @@ const featured = selectFeatured(await getCollection('projects'), 3);
 
 <BaseLayout
   title={`${name} · Portfolio`}
-  description={`${name}'s portfolio: selected projects, experience, and a few math-flavoured experiments.`}
+  description={`${name}’s portfolio: selected projects, experience, and a few math-flavoured experiments.`}
 >
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero__text">
-      <p class="label hero__eyebrow">Portfolio</p>
       <h1 id="hero-title" class="hero__name">{name}</h1>
       <p class="hero__role">{role}</p>
 
-      <ol class="hero__strengths" role="list" aria-label="Strengths">
-        {
-          strengths.map((strength, index) => (
-            <li>
-              <span class="label" aria-hidden="true">
-                {String(index + 1).padStart(2, '0')}
-              </span>
-              <span>{strength}</span>
-            </li>
-          ))
-        }
-      </ol>
+      <ul class="hero__strengths" role="list" aria-label="Strengths">
+        {strengths.map((strength) => <li>{strength}</li>)}
+      </ul>
 
       <div class="hero__actions">
         <a class="button button--primary" href="/projects/">
-          View projects <span class="button__arrow" aria-hidden="true">→</span>
+          View projects
         </a>
-        <a class="button button--secondary" href={`mailto:${contact.email}`}>Get in touch</a>
+        <a class="button button--secondary" href={`mailto:${contact.email}`}>Email me</a>
         <ContactLinks variant="compact" />
       </div>
     </div>
@@ -52,21 +42,20 @@ const featured = selectFeatured(await getCollection('projects'), 3);
 
   <section class="selected section" aria-labelledby="selected-title">
     <div class="section-head selected__head">
-      <p class="label">Selected work</p>
       <h2 id="selected-title">Things I’ve built</h2>
     </div>
     <ol class="selected__list" role="list">
       {
-        featured.map((project, index) => (
+        featured.map((project) => (
           <li>
-            <ProjectCard project={project} index={index} headingLevel={3} />
+            <ProjectCard project={project} headingLevel={3} />
           </li>
         ))
       }
     </ol>
     <p class="selected__more">
       <a class="button button--secondary" href="/projects/">
-        View all projects <span class="button__arrow" aria-hidden="true">→</span>
+        View all projects
       </a>
     </p>
   </section>
@@ -86,10 +75,6 @@ const featured = selectFeatured(await getCollection('projects'), 3);
     display: grid;
     gap: var(--space-s);
     min-width: 0;
-  }
-
-  .hero__eyebrow {
-    margin-block-end: calc(-1 * var(--space-2xs));
   }
 
   .hero__name {

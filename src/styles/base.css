@@ -202,8 +202,7 @@
     transition:
       background-color var(--dur-fast) var(--ease),
       border-color var(--dur-fast) var(--ease),
-      color var(--dur-fast) var(--ease),
-      transform var(--dur-fast) var(--ease);
+      color var(--dur-fast) var(--ease);
   }
 
   .button--primary {
@@ -216,10 +215,6 @@
     color: var(--color-text);
   }
 
-  .button__arrow {
-    transition: transform var(--dur-fast) var(--ease);
-  }
-
   @media (hover: hover) {
     .button--primary:hover {
       background: var(--color-accent);
@@ -229,10 +224,6 @@
     .button--secondary:hover {
       border-color: var(--color-accent);
       color: var(--color-accent);
-    }
-
-    .button:hover .button__arrow {
-      transform: translateX(3px);
     }
   }
 }
