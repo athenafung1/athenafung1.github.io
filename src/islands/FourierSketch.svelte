@@ -38,7 +38,7 @@
   let raf = 0;
   let onScreen = true;
   let ctx: CanvasRenderingContext2D | null = null;
-  let colors = { accent: '#b3401d', muted: '#5a554c', rule: '#ddd6ca' };
+  let colors = { accent: '#5f6b3e', muted: '#4b5650', rule: '#d3d9d3' };
 
   function loadShape(points: Point[], id: string, label: string, autoplay: boolean) {
     const fitted = normalizeToViewBox(points, WIDTH, HEIGHT, 56).map((p) => ({ x: p.x - WIDTH / 2, y: p.y - HEIGHT / 2 }));

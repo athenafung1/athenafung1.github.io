@@ -6,21 +6,26 @@
     /* Follow the device unless the visitor picked a theme (data-theme set by the head script). */
     color-scheme: light dark;
 
-    /* Color: defined once with light-dark(). Contrast checked for WCAG 2.1 AA in both themes
-       (text ≥ 15:1, muted ≥ 6.5:1, accent ≥ 5:1, UI borders and focus ≥ 3:1). */
-    --color-bg: light-dark(#f5f1ea, #121110);
-    --color-surface: light-dark(#fffcf7, #1c1a17);
-    --color-text: light-dark(#1b1915, #efe9df);
-    --color-muted: light-dark(#5a554c, #aaa296);
-    --color-accent: light-dark(#b3401d, #ff8d63);
-    --color-accent-ink: light-dark(#ffffff, #1b0f0a);
-    --color-border: light-dark(#8f877a, #7a7268);
-    --color-rule: light-dark(#ddd6ca, #35312b);
+    /* Color: sage on cool grey paper, defined once with light-dark(). Contrast checked for WCAG 2.1
+       AA in both themes (text ≥ 13:1, muted ≥ 6.5:1, accent ≥ 4.5:1, UI borders and focus ≥ 3:1).
+       --color-curve is the sage itself, #899A59: the curves, the site mark, link underlines and
+       margin-note rules. On the light paper it is only 2.7:1, too faint for text, so green text
+       uses --color-accent, a darker olive of the same hue. */
+    --color-bg: light-dark(#f0f2ee, #1f2421);
+    --color-surface: light-dark(#f9faf8, #272d29);
+    --color-text: light-dark(#18201c, #ecefea);
+    --color-muted: light-dark(#4b5650, #b1bab1);
+    --color-accent: light-dark(#5f6b3e, #899a59);
+    --color-accent-ink: light-dark(#ffffff, #1b221d);
+    --color-border: light-dark(#7d8881, #838c84);
+    --color-rule: light-dark(#d3d9d3, #39413b);
     --color-focus: light-dark(#1f4ed8, #8fb0ff);
-    --color-curve: light-dark(#b3401d, #ff8d63);
+    --color-curve: light-dark(#899a59, #899a59);
 
-    /* Type: Astro's Fonts API defines --font-display and --font-text (with metric-matched
-       fallbacks). Fluid steps scale linearly from 320px to 1280px viewports. */
+    /* Type: one family, IBM Plex Sans Condensed, for headings and text. Astro's Fonts API defines
+       --font-text (with metric-matched fallbacks); --font-display names the same face so headings
+       keep their own variable. Fluid steps scale linearly from 320px to 1280px viewports. */
+    --font-display: var(--font-text);
     --step--1: clamp(0.833rem, 0.81rem + 0.12vw, 0.9rem);
     --step-0: clamp(1rem, 0.958rem + 0.21vw, 1.125rem);
     --step-1: clamp(1.2rem, 1.117rem + 0.42vw, 1.45rem);

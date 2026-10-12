@@ -74,7 +74,6 @@
     font-family: var(--font-display);
     font-weight: 600;
     line-height: var(--leading-snug);
-    letter-spacing: -0.01em;
     text-wrap: balance;
     overflow-wrap: anywhere;
     hyphens: auto;
@@ -102,7 +101,7 @@
 
   a {
     color: inherit;
-    text-decoration-color: var(--color-accent);
+    text-decoration-color: var(--color-curve);
     text-decoration-thickness: 0.08em;
     text-underline-offset: 0.18em;
     transition: color var(--dur-fast) var(--ease), text-decoration-color var(--dur-fast) var(--ease);
@@ -141,13 +140,13 @@
     transform: none;
   }
 
-  /* Small caps + tabular figures: the "engineering" label voice without a third family. */
+  /* Medium weight + tabular figures: the label voice, in the same family as everything else. */
   .label {
     font-family: var(--font-text);
     font-size: var(--step--1);
+    font-weight: 500;
     font-variant-numeric: tabular-nums;
-    font-variant-caps: all-small-caps;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.01em;
     color: var(--color-muted);
   }
 
@@ -263,7 +262,7 @@
     display: block;
     margin-block: var(--space-xs);
     padding-inline-start: var(--space-s);
-    border-inline-start: 2px solid var(--color-accent);
+    border-inline-start: 2px solid var(--color-curve);
     font-size: var(--step--1);
     line-height: 1.5;
     color: var(--color-muted);
@@ -311,7 +310,7 @@
       height: 5px;
       margin-inline-start: -2.5px;
       border-radius: 50%;
-      background: var(--color-accent);
+      background: var(--color-curve);
     }
   }
 }

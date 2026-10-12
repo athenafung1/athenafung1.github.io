@@ -41,8 +41,8 @@ const year = new Date().getFullYear();
     {noindex && <meta name="robots" content="noindex" />}
     <meta name="author" content={name} />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f5f1ea" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#121110" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f0f2ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1f2421" media="(prefers-color-scheme: dark)" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     <meta property="og:type" content="website" />
@@ -55,8 +55,7 @@ const year = new Date().getFullYear();
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
 
-    <Font cssVariable="--font-text" preload />
-    <Font cssVariable="--font-display" />
+    <Font cssVariable="--font-text" preload={[{ weight: 400, style: 'normal' }]} />
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>

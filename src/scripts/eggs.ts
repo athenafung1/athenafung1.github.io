@@ -81,6 +81,6 @@ for (const egg of active) {
 // A hello for anyone who opens the developer console.
 console.info(
   '%cHi, curious engineer.%c\nThis site is plain HTML from Astro, with Svelte only where things move.\nSource: https://github.com/athenafung1/athenafung1.github.io\nPsst: try ↑ ↑ ↓ ↓ ← → ← → B A.',
-  'font: 600 14px/1.4 Georgia, serif; color: #b3401d',
+  'font: 600 14px/1.4 Georgia, serif; color: #899a59',
   'font: 12px/1.5 system-ui, sans-serif',
 );
