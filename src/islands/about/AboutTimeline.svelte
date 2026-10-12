@@ -182,7 +182,7 @@
       <li class="entry" class:entry--lead={index === 0 && entry.ongoing} class:is-lit={timeline.isLit(entry.id)} data-entry={entry.id}>
         <p class="label entry__meta">
           <span>{entry.period}</span>
-          <span>{entry.kind === 'work' ? 'Work' : 'Education'}</span>
+          <!-- <span>{entry.kind === 'work' ? 'Work' : 'Education'}</span> -->
         </p>
         <h3 class="entry__title">
           {entry.title}
