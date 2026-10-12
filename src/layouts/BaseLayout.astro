@@ -5,9 +5,12 @@ import { Font } from 'astro:assets';
 import { getEntry } from 'astro:content';
 import SiteHeader from '../components/SiteHeader.astro';
 import ContactLinks from '../components/ContactLinks.astro';
+import LookPicker from '../components/LookPicker.astro';
+import { LOOKS, looksCss } from '../lib/looks.ts';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/layout.css';
+import '../styles/looks.css';
 
 interface Props {
   title: string;
@@ -25,6 +28,7 @@ const ogImageUrl = new URL(ogImage, site).href;
 const author = await getEntry('profile', 'author');
 const name = author?.data.name ?? 'Athena Fung';
 const year = new Date().getFullYear();
+const lookIds = LOOKS.map((look) => look.id);
 ---
 
 <!doctype html>
@@ -33,6 +37,17 @@ const year = new Date().getFullYear();
     <meta charset="utf-8" />
     <script is:inline>
       try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}
+    </script>
+    <script is:inline define:vars={{ lookIds }}>
+      // Look lab: a preview frame on /look-lab/ names its look and theme in window.name
+      // ("lab:plotter:dark"). Anywhere else, a ?look= link or the stored choice applies the look
+      // and shows the switcher; "current" shows the switcher with today's look.
+      try{var d=document.documentElement,n=/^lab:(\w+):(light|dark)$/.exec(window.name),l=null,s=null,p;
+      if(n){l=n[1];d.dataset.theme=n[2];d.dataset.lookEmbed=''}
+      else{p=new URLSearchParams(location.search).get('look');try{s=localStorage.getItem('look')}catch(e){}
+      if(lookIds.indexOf(p)>=0){s=p;try{localStorage.setItem('look',p)}catch(e){}}
+      if(lookIds.indexOf(s)>=0){l=s;d.dataset.lookLab=''}}
+      if(l!=='current'&&lookIds.indexOf(l)>=0)d.dataset.look=l}catch(e){}
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>{title}</title>
@@ -57,6 +72,10 @@ const year = new Date().getFullYear();
 
     <Font cssVariable="--font-text" preload />
     <Font cssVariable="--font-display" />
+    <Font cssVariable="--font-stix" />
+    <Font cssVariable="--font-b612" />
+    <Font cssVariable="--font-archivo" />
+    <style is:inline set:html={looksCss()}></style>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
@@ -70,6 +89,7 @@ const year = new Date().getFullYear();
         <p class="label footer-note" data-egg-target>© {year} {name}</p>
       </footer>
     </div>
+    <LookPicker />
     <script>
       import '../scripts/theme.ts';
       import '../scripts/eggs.ts';

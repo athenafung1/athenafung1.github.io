@@ -29,7 +29,7 @@ export function watchTheme(root: HTMLElement, onChange: (colors: ThemeColors) =>
     onChange(colors);
   };
   const observer = new MutationObserver(read);
-  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-look'] });
   const scheme = window.matchMedia('(prefers-color-scheme: dark)');
   scheme.addEventListener('change', read);
   read();

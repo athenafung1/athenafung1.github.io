@@ -1,0 +1,90 @@
+---
+// Look lab switcher: a small panel in the corner of every page once someone has opened a look
+// (from /look-lab/ or a ?look= link). Hidden otherwise, and inside the lab's preview frames.
+import { LOOKS } from '../lib/looks.ts';
+---
+
+<div class="look-picker" data-look-picker>
+  <label class="look-picker__label" for="look-picker-select">Look</label>
+  <select id="look-picker-select" class="look-picker__select">
+    {LOOKS.map((look) => <option value={look.id}>{look.name}</option>)}
+  </select>
+  <a class="look-picker__link" href="/look-lab/">Compare</a>
+  <button type="button" class="look-picker__exit" data-look-exit>Exit</button>
+</div>
+
+<script>
+  import { isLookId } from '../lib/looks.ts';
+
+  const root = document.documentElement;
+  const picker = document.querySelector<HTMLElement>('[data-look-picker]');
+  const select = picker?.querySelector('select');
+  const store = (id: string | null) => {
+    try {
+      if (id) localStorage.setItem('look', id);
+      else localStorage.removeItem('look');
+    } catch {
+      // Storage blocked: the look still applies to this page view.
+    }
+  };
+
+  if (picker && select) {
+    select.value = root.dataset.look ?? 'current';
+    select.addEventListener('change', () => {
+      const id = select.value;
+      if (!isLookId(id)) return;
+      if (id === 'current') delete root.dataset.look;
+      else root.dataset.look = id;
+      store(id);
+    });
+    picker.querySelector('[data-look-exit]')?.addEventListener('click', () => {
+      delete root.dataset.look;
+      delete root.dataset.lookLab;
+      store(null);
+    });
+  }
+</script>
+
+<style>
+  .look-picker {
+    position: fixed;
+    inset-inline-start: max(var(--space-s), env(safe-area-inset-left));
+    inset-block-end: max(var(--space-s), env(safe-area-inset-bottom));
+    z-index: 50;
+    display: none;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-3xs) var(--space-3xs) var(--space-3xs) var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-m);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-family: var(--font-text);
+    font-size: var(--step--1);
+  }
+
+  :global(:root[data-look-lab]) .look-picker {
+    display: flex;
+  }
+
+  .look-picker__label {
+    color: var(--color-muted);
+  }
+
+  .look-picker__select,
+  .look-picker__exit {
+    min-height: 2.25rem;
+    padding-inline: var(--space-2xs);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-s);
+    background: var(--color-bg);
+  }
+
+  .look-picker__exit {
+    cursor: pointer;
+  }
+
+  .look-picker__link {
+    padding-inline: var(--space-3xs);
+  }
+</style>

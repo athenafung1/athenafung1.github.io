@@ -40,5 +40,34 @@ export default defineConfig({
       subsets: ['latin'],
       fallbacks: ['system-ui', 'sans-serif'],
     },
+    // Look lab (/look-lab/): candidate faces. They are declared on every page but never
+    // preloaded, so a browser only downloads one when the active look uses it.
+    {
+      provider: fontProviders.fontsource(),
+      name: 'STIX Two Text',
+      cssVariable: '--font-stix',
+      weights: ['400 700'],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['Times New Roman', 'serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'B612',
+      cssVariable: '--font-b612',
+      weights: [400, 700],
+      styles: ['normal', 'italic'],
+      subsets: ['latin'],
+      fallbacks: ['system-ui', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
+      name: 'Archivo',
+      cssVariable: '--font-archivo',
+      weights: ['400 800'],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['system-ui', 'sans-serif'],
+    },
   ],
 });

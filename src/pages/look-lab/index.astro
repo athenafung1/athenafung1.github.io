@@ -1,0 +1,366 @@
+---
+// Look lab: the real site in each candidate palette and typeface, side by side. Each column is a
+// specimen styled by its own look (data-look-scope) above a live, scaled-down frame of a page in
+// that look. The frames name their look and theme in window.name, which BaseLayout's head script
+// reads, so links followed inside a frame keep the look. Not in the nav; noindex.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { LOOKS } from '../../lib/looks.ts';
+
+const PAGES = [
+  { label: 'Home', href: '/' },
+  { label: 'About', href: '/about/' },
+  { label: 'Projects', href: '/projects/' },
+  { label: 'Case study', href: '/projects/smart-legos/' },
+  { label: 'Fun', href: '/fun/' },
+];
+const SWATCHES = [
+  ['--color-bg', 'Background'],
+  ['--color-surface', 'Surface'],
+  ['--color-text', 'Text'],
+  ['--color-muted', 'Muted text'],
+  ['--color-accent', 'Accent'],
+  ['--color-curve', 'Curves'],
+] as const;
+---
+
+<BaseLayout
+  title="Look lab · Athena Fung"
+  description="Prototype palettes and typefaces for this site, shown side by side on the real pages."
+  noindex
+>
+  <header class="lab-head">
+    <h1 class="lab-head__title">Compare looks</h1>
+    <p class="lab-head__intro">
+      The real site in four palettes and typefaces. Layout and words are the same in each; only colour and type
+      change. Scroll inside any preview and the others follow.
+    </p>
+  </header>
+
+  <form class="lab-bar" data-lab-bar>
+    <fieldset class="lab-bar__group">
+      <legend>Page</legend>
+      {
+        PAGES.map((page, index) => (
+          <label class="lab-bar__option">
+            <input type="radio" name="page" value={page.href} checked={index === 0} />
+            <span>{page.label}</span>
+          </label>
+        ))
+      }
+    </fieldset>
+    <fieldset class="lab-bar__group">
+      <legend>Theme</legend>
+      <label class="lab-bar__option"><input type="radio" name="theme" value="light" checked /><span>Light</span></label>
+      <label class="lab-bar__option"><input type="radio" name="theme" value="dark" /><span>Dark</span></label>
+    </fieldset>
+    <fieldset class="lab-bar__group">
+      <legend>Width</legend>
+      <label class="lab-bar__option"><input type="radio" name="width" value="desktop" checked /><span>Desktop</span></label>
+      <label class="lab-bar__option"><input type="radio" name="width" value="phone" /><span>Phone</span></label>
+    </fieldset>
+    <label class="lab-bar__check"><input type="checkbox" name="sync" checked /> Scroll together</label>
+  </form>
+
+  <noscript><p class="lab-head__intro">The previews need JavaScript. Open a look directly instead:</p></noscript>
+
+  <div class="looks" data-looks data-width="desktop">
+    {
+      LOOKS.map((look) => (
+        <article class="look" data-look-scope={look.id} aria-labelledby={`look-${look.id}`}>
+          <div class="look__spec">
+            <h2 id={`look-${look.id}`} class="look__name">{look.name}</h2>
+            <p class="look__idea">{look.idea}</p>
+            <p class="look__type">{look.type}</p>
+            <ul class="look__swatches" role="list" aria-label="Colours">
+              {SWATCHES.map(([token, label]) => (
+                <li style={`--swatch: var(${token})`} title={label}>
+                  <span class="visually-hidden">{label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div class="look__frame" data-frame-box>
+            <iframe data-look-frame={look.id} name={`lab:${look.id}:light`} title={`${look.name} preview`} width="1280" height="900" tabindex="-1" />
+          </div>
+          <a class="look__open" href={`/?look=${look.id}`}>Browse the site in {look.name}</a>
+        </article>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<script>
+  const SIZES = { desktop: [1280, 900], phone: [390, 844] } as const;
+  type Width = keyof typeof SIZES;
+
+  const form = document.querySelector<HTMLFormElement>('[data-lab-bar]')!;
+  const looks = document.querySelector<HTMLElement>('[data-looks]')!;
+  const frames = [...document.querySelectorAll<HTMLIFrameElement>('[data-look-frame]')];
+  const field = (name: string) => form.elements.namedItem(name) as RadioNodeList;
+  const root = document.documentElement;
+
+  // Start in the theme the lab page itself is showing.
+  const applied = root.dataset.theme;
+  let theme = applied === 'light' || applied === 'dark' ? applied : matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  let width: Width = 'desktop';
+  field('theme').value = theme;
+
+  const docOf = (frame: HTMLIFrameElement) => {
+    try {
+      return frame.contentDocument;
+    } catch {
+      return null;
+    }
+  };
+
+  function setTheme(next: string) {
+    theme = next;
+    looks.style.colorScheme = theme;
+    for (const frame of frames) {
+      // Chrome doesn't pass a changed name attribute on to the frame, so set window.name too.
+      frame.name = `lab:${frame.dataset.lookFrame}:${theme}`;
+      if (frame.contentWindow) frame.contentWindow.name = frame.name;
+      const doc = docOf(frame);
+      if (doc?.documentElement) doc.documentElement.dataset.theme = theme;
+    }
+  }
+
+  function setPage(href: string) {
+    for (const frame of frames) frame.src = href;
+  }
+
+  function fit() {
+    const [w, h] = SIZES[width];
+    for (const frame of frames) {
+      const box = frame.parentElement!;
+      const scale = Math.min(1, box.clientWidth / w);
+      frame.width = String(w);
+      frame.height = String(h);
+      frame.style.transform = `scale(${scale})`;
+      box.style.height = `${Math.round(h * scale)}px`;
+    }
+  }
+
+  function setWidth(next: Width) {
+    width = next;
+    looks.dataset.width = width;
+    fit();
+  }
+
+  // Scroll together: the frame being scrolled leads; the others follow at the same fraction of
+  // their own page, since fonts change each page's height. Scroll events from the followers are
+  // ignored until the leader has been still for a moment.
+  let leader: Window | null = null;
+  let release = 0;
+  function follow(win: Window) {
+    if (!(form.elements.namedItem('sync') as HTMLInputElement).checked) return;
+    if (leader && leader !== win) return;
+    leader = win;
+    clearTimeout(release);
+    release = window.setTimeout(() => (leader = null), 160);
+    const span = (w: Window) => w.document.documentElement.scrollHeight - w.innerHeight;
+    const at = span(win) > 0 ? win.scrollY / span(win) : 0;
+    for (const frame of frames) {
+      const other = frame.contentWindow;
+      if (other && other !== win) other.scrollTo(0, at * span(other));
+    }
+  }
+
+  for (const frame of frames) {
+    frame.addEventListener('load', () => {
+      const win = frame.contentWindow;
+      win?.addEventListener('scroll', () => follow(win), { passive: true });
+    });
+  }
+
+  form.addEventListener('change', (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.name === 'page') setPage(input.value);
+    if (input.name === 'theme') setTheme(input.value);
+    if (input.name === 'width') setWidth(input.value as Width);
+  });
+
+  new ResizeObserver(fit).observe(looks);
+  setTheme(theme);
+  setWidth(width);
+  setPage(field('page').value);
+</script>
+
+<style>
+  .lab-head {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+    margin-block-end: var(--space-l);
+  }
+
+  .lab-head__title {
+    font-size: var(--step-4);
+  }
+
+  .lab-head__intro {
+    color: var(--color-muted);
+  }
+
+  /* Controls stay in reach while scrolling down the previews. */
+  .lab-bar {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 5;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2xs) var(--space-l);
+    margin-block-end: var(--space-m);
+    padding-block: var(--space-2xs);
+    background: var(--color-bg);
+    border-block-end: 1px solid var(--color-rule);
+  }
+
+  .lab-bar__group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-3xs);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .lab-bar__group legend {
+    float: left;
+    margin-inline-end: var(--space-2xs);
+    color: var(--color-muted);
+    font-size: var(--step--1);
+  }
+
+  .lab-bar__option {
+    position: relative;
+  }
+
+  .lab-bar__option input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    margin: 0;
+    cursor: pointer;
+  }
+
+  .lab-bar__option span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    padding-inline: var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--step--1);
+    font-weight: 600;
+  }
+
+  .lab-bar__option input:checked + span {
+    background: var(--color-text);
+    border-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  .lab-bar__option input:focus-visible + span {
+    outline: 3px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  .lab-bar__check {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--tap);
+    font-size: var(--step--1);
+  }
+
+  /* Wider than the page column on big screens: previews need the room. */
+  .looks {
+    --wide: min(100vw - 2 * var(--gutter), 120rem);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 30rem), 1fr));
+    gap: var(--space-m);
+    width: var(--wide);
+    margin-inline: calc(50% - var(--wide) / 2);
+  }
+
+  .looks[data-width='phone'] {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  }
+
+  /* Each card spans three rows of the shared grid (subgrid), so descriptions of different lengths
+     still leave every preview starting at the same height. */
+  .look {
+    display: grid;
+    grid-row: span 3;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: subgrid;
+    row-gap: var(--space-s);
+    min-width: 0;
+    padding: var(--space-s);
+    border: 1px solid var(--color-rule);
+    border-radius: var(--radius-m);
+  }
+
+  .look__spec {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+
+  .look__name {
+    font-size: var(--step-2);
+  }
+
+  .look__idea {
+    max-width: 60ch;
+  }
+
+  .look__type {
+    max-width: 60ch;
+    color: var(--color-muted);
+    font-size: var(--step--1);
+  }
+
+  .look__swatches {
+    display: flex;
+    gap: var(--space-3xs);
+    margin: var(--space-2xs) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .look__swatches li {
+    width: 2rem;
+    height: 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-s);
+    background: var(--swatch);
+  }
+
+  .look__frame {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-s);
+  }
+
+  /* Out of flow, so the full-size frame never widens the column; the script sizes the box. */
+  .look__frame iframe {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    display: block;
+    border: 0;
+    transform-origin: 0 0;
+    background: var(--color-bg);
+  }
+
+  .look__open {
+    justify-self: start;
+    align-self: end;
+    font-weight: 600;
+  }
+</style>

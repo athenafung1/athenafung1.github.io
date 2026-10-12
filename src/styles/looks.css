@@ -1,0 +1,72 @@
+/* Look lab: the per-look type details that tokens alone can't express. Colours and fonts live in
+   src/lib/looks.ts. Unlayered on purpose, so these win over the base layer and component styles.
+   Each rule applies to the whole page when a look is active (:root[data-look] body) and to a
+   specimen on the lab page ([data-look-scope]). */
+
+[data-look-scope] {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-text);
+  line-height: var(--leading-body);
+}
+
+/* Plotter: one family, STIX Two Text. Labels are italic like variables in an equation, instead of
+   spaced small caps; serif text gets a little more line-height. */
+:is(:root[data-look='plotter'] body, [data-look-scope='plotter']) {
+  --leading-body: 1.65;
+}
+
+:is(:root[data-look='plotter'] body, [data-look-scope='plotter']) :is(.label, .project-card__tech, .case-study__tech) {
+  font-size: var(--step-0);
+  font-style: italic;
+  font-variant-caps: normal;
+  letter-spacing: 0;
+}
+
+/* Engineering pad: B612 is wide, so the display size steps down; bold headings like lettering on
+   a worked problem; a faint grid like the one printed on the back of the pad and showing through. */
+:is(:root[data-look='pad'] body, [data-look-scope='pad']) {
+  --step-display: clamp(2.4rem, 1.4rem + 5vw, 5.5rem);
+  background-image:
+    linear-gradient(color-mix(in srgb, var(--color-rule) 55%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--color-rule) 55%, transparent) 1px, transparent 1px);
+  background-size: 1.5rem 1.5rem;
+  background-position: -1px -1px;
+}
+
+:is(:root[data-look='pad'] body, [data-look-scope='pad']) :is(h1, h2, h3, h4, .site-mark) {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+:is(:root[data-look='pad'] body, [data-look-scope='pad']) :is(.label, .project-card__tech, .case-study__tech) {
+  font-variant-caps: normal;
+  letter-spacing: 0;
+}
+
+/* Riso print: Archivo, heavy and tight in headings like a zine (a step lighter for the smaller
+   ones, so the big headings keep their weight); labels in plain semibold. */
+:is(:root[data-look='riso'] body, [data-look-scope='riso']) :is(h1, h2, h3, h4, .site-mark) {
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+:is(:root[data-look='riso'] body, [data-look-scope='riso']) :is(h3, h4) {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+:is(:root[data-look='riso'] body, [data-look-scope='riso']) .hero__name {
+  letter-spacing: -0.045em;
+}
+
+:is(:root[data-look='riso'] body, [data-look-scope='riso']) :is(.label, .project-card__tech, .case-study__tech) {
+  font-variant-caps: normal;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+/* Inside a lab frame the dev toolbar would cover the bottom of every preview. */
+:root[data-look-embed] astro-dev-toolbar {
+  display: none !important;
+}

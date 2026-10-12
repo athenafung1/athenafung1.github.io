@@ -228,7 +228,7 @@
       cleanups.push(() => document.removeEventListener('visibilitychange', onVisibilityChange));
 
       const themeObserver = new MutationObserver(readColors);
-      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-look'] });
       scheme.addEventListener('change', readColors);
       cleanups.push(() => {
         themeObserver.disconnect();
