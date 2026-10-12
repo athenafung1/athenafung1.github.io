@@ -10,6 +10,40 @@
   line-height: var(--leading-body);
 }
 
+/* Greens (Emerald, Forest, Sage): IBM Plex Sans Condensed for headings and labels, B612 for text.
+   Narrow headings over a wide, open text face, so the two read as clearly different voices.
+   Condensed letters are already tight, so headings drop the negative tracking. */
+:is(:root[data-look^='green-'] body, [data-look-scope^='green-']) :is(h1, h2, h3, h4, .site-mark, .hero__name) {
+  letter-spacing: 0;
+}
+
+:is(:root[data-look^='green-'] body, [data-look-scope^='green-']) :is(.label, .project-card__tech, .case-study__tech) {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-variant-caps: normal;
+  letter-spacing: 0.01em;
+}
+
+/* Sage: #899A59 is only 2.7:1 on the light paper, too faint for text. In light mode the marks use
+   it (logo, nav and link underlines, margin-note rules; the curves already do) and green text uses
+   the darker olive in --color-accent. In dark mode both are #899A59. */
+:is(:root[data-look='green-sage'] body, [data-look-scope='green-sage']) .site-mark__glyph {
+  color: var(--color-curve);
+}
+
+:is(:root[data-look='green-sage'] body, [data-look-scope='green-sage']) .site-nav a::after,
+:is(:root[data-look='green-sage'] body, [data-look-scope='green-sage']) .margin-note::after {
+  background: var(--color-curve);
+}
+
+:is(:root[data-look='green-sage'] body, [data-look-scope='green-sage']) a {
+  text-decoration-color: var(--color-curve);
+}
+
+:is(:root[data-look='green-sage'] body, [data-look-scope='green-sage']) .margin-note {
+  border-inline-start-color: var(--color-curve);
+}
+
 /* Plotter: one family, STIX Two Text. Labels are italic like variables in an equation, instead of
    spaced small caps; serif text gets a little more line-height. */
 :is(:root[data-look='plotter'] body, [data-look-scope='plotter']) {

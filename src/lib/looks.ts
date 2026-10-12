@@ -16,7 +16,7 @@ export type Palette = {
   curve: string;
 };
 
-export type LookId = 'current' | 'plotter' | 'pad' | 'riso';
+export type LookId = 'current' | 'green-emerald' | 'green-forest' | 'green-sage' | 'plotter' | 'pad' | 'riso';
 
 export type Look = {
   id: LookId;
@@ -30,6 +30,11 @@ export type Look = {
   light: Palette;
   dark: Palette;
 };
+
+// The three greens share everything but the green: IBM Plex Sans Condensed for headings and
+// labels, B612 for text, on the same cool grey paper.
+const GREEN_TYPE = 'IBM Plex Sans Condensed for headings and labels, B612 for text.';
+const GREEN_FONTS = { display: '--font-plex-cond', text: '--font-b612' };
 
 export const LOOKS: Look[] = [
   {
@@ -61,6 +66,99 @@ export const LOOKS: Look[] = [
       rule: '#35312b',
       focus: '#8fb0ff',
       curve: '#ff8d63',
+    },
+  },
+  {
+    id: 'green-emerald',
+    name: 'Emerald',
+    idea: 'A bright, jewel-like green on cool grey paper by day; deep teal-green by night.',
+    type: GREEN_TYPE,
+    fonts: GREEN_FONTS,
+    light: {
+      bg: '#f0f2ee',
+      surface: '#f9faf8',
+      text: '#18201c',
+      muted: '#4b5650',
+      accent: '#08765a',
+      accentInk: '#ffffff',
+      border: '#7d8881',
+      rule: '#d3d9d3',
+      focus: '#1f4ed8',
+      curve: '#0e9a6e',
+    },
+    dark: {
+      bg: '#0f2620',
+      surface: '#14302a',
+      text: '#e6f2ec',
+      muted: '#a3bdb2',
+      accent: '#46d9a0',
+      accentInk: '#062018',
+      border: '#6f9285',
+      rule: '#22443a',
+      focus: '#8fb0ff',
+      curve: '#46d9a0',
+    },
+  },
+  {
+    id: 'green-forest',
+    name: 'Forest',
+    idea: 'A deep, quiet green on cool grey paper by day; dark forest green by night.',
+    type: GREEN_TYPE,
+    fonts: GREEN_FONTS,
+    light: {
+      bg: '#f0f2ee',
+      surface: '#f9faf8',
+      text: '#18201c',
+      muted: '#4b5650',
+      accent: '#285c3c',
+      accentInk: '#ffffff',
+      border: '#7d8881',
+      rule: '#d3d9d3',
+      focus: '#1f4ed8',
+      curve: '#2f6b46',
+    },
+    dark: {
+      bg: '#172a1f',
+      surface: '#1d3326',
+      text: '#e8efe6',
+      muted: '#aab9a8',
+      accent: '#9bd3a4',
+      accentInk: '#10241a',
+      border: '#7a8f7b',
+      rule: '#2b4433',
+      focus: '#8fb0ff',
+      curve: '#9bd3a4',
+    },
+  },
+  {
+    id: 'green-sage',
+    name: 'Sage',
+    idea: 'A soft olive sage, #899A59, on cool grey paper by day; green-grey charcoal by night. The calmest of the three.',
+    type: GREEN_TYPE,
+    fonts: GREEN_FONTS,
+    light: {
+      bg: '#f0f2ee',
+      surface: '#f9faf8',
+      text: '#18201c',
+      muted: '#4b5650',
+      accent: '#5f6b3e',
+      accentInk: '#ffffff',
+      border: '#7d8881',
+      rule: '#d3d9d3',
+      focus: '#1f4ed8',
+      curve: '#899a59',
+    },
+    dark: {
+      bg: '#1f2421',
+      surface: '#272d29',
+      text: '#ecefea',
+      muted: '#b1bab1',
+      accent: '#899a59',
+      accentInk: '#1b221d',
+      border: '#838c84',
+      rule: '#39413b',
+      focus: '#8fb0ff',
+      curve: '#899a59',
     },
   },
   {

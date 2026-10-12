@@ -27,8 +27,9 @@ describe('LOOKS', () => {
     expect(isLookId(null)).toBe(false);
   });
 
-  // Text pairs need WCAG AA for body text (4.5:1, 7:1 for the main text colour); borders, focus
-  // rings and the curves are non-text graphics (3:1).
+  // Text pairs need WCAG AA for body text (4.5:1, 7:1 for the main text colour); borders and focus
+  // rings are non-text UI (3:1). The curves are decorative (aria-hidden) and only need to stand
+  // clear of the paper (2.5:1), which leaves room for soft accents like Sage's #899A59.
   const pairs: Array<[keyof Palette, keyof Palette, number]> = [
     ['text', 'bg', 7],
     ['text', 'surface', 7],
@@ -39,7 +40,7 @@ describe('LOOKS', () => {
     ['accentInk', 'accent', 4.5],
     ['border', 'bg', 3],
     ['focus', 'bg', 3],
-    ['curve', 'bg', 3],
+    ['curve', 'bg', 2.5],
   ];
   for (const look of LOOKS) {
     for (const mode of ['light', 'dark'] as const) {

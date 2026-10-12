@@ -31,7 +31,7 @@ const SWATCHES = [
   <header class="lab-head">
     <h1 class="lab-head__title">Compare looks</h1>
     <p class="lab-head__intro">
-      The real site in four palettes and typefaces. Layout and words are the same in each; only colour and type
+      The real site in each look, side by side. Layout and words are the same in each; only colour and type
       change. Scroll inside any preview and the others follow.
     </p>
   </header>
@@ -59,6 +59,17 @@ const SWATCHES = [
       <label class="lab-bar__option"><input type="radio" name="width" value="phone" /><span>Phone</span></label>
     </fieldset>
     <label class="lab-bar__check"><input type="checkbox" name="sync" checked /> Scroll together</label>
+    <fieldset class="lab-bar__group">
+      <legend>Show</legend>
+      {
+        LOOKS.map((look) => (
+          <label class="lab-bar__option">
+            <input type="checkbox" name="show" value={look.id} checked />
+            <span>{look.name}</span>
+          </label>
+        ))
+      }
+    </fieldset>
   </form>
 
   <noscript><p class="lab-head__intro">The previews need JavaScript. Open a look directly instead:</p></noscript>
@@ -178,6 +189,11 @@ const SWATCHES = [
     if (input.name === 'page') setPage(input.value);
     if (input.name === 'theme') setTheme(input.value);
     if (input.name === 'width') setWidth(input.value as Width);
+    if (input.name === 'show') {
+      const card = looks.querySelector<HTMLElement>(`[data-look-scope='${input.value}']`);
+      if (card) card.hidden = !input.checked;
+      fit();
+    }
   });
 
   new ResizeObserver(fit).observe(looks);

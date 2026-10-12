@@ -62,6 +62,15 @@ export default defineConfig({
     },
     {
       provider: fontProviders.fontsource(),
+      name: 'IBM Plex Sans Condensed',
+      cssVariable: '--font-plex-cond',
+      weights: [500, 600, 700],
+      styles: ['normal'],
+      subsets: ['latin'],
+      fallbacks: ['Arial Narrow', 'system-ui', 'sans-serif'],
+    },
+    {
+      provider: fontProviders.fontsource(),
       name: 'Archivo',
       cssVariable: '--font-archivo',
       weights: ['400 800'],
