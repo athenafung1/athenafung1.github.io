@@ -199,10 +199,13 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
     }
   }
 
+  /* Wide cards: the emblem sits just past the text column, beside the words it belongs to. */
   @container (min-width: 40rem) {
     .project-card--emblem .project-card__grid {
-      grid-template-columns: minmax(0, 1fr) 7.5rem;
+      grid-template-columns: minmax(0, var(--measure)) 7.5rem;
+      justify-content: start;
       align-items: center;
+      column-gap: var(--space-xl);
     }
 
     .project-card--emblem .project-card__body {

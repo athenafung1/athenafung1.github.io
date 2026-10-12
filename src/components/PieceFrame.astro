@@ -54,4 +54,18 @@ const { id, name, idea } = Astro.props;
   .piece__noscript {
     margin: 0;
   }
+
+  /* Wide screens: title and description in a column beside the sketch, so the card has no empty
+     quarter where the capped canvas stops. */
+  @media (min-width: 64rem) {
+    .piece {
+      grid-template-columns: minmax(12rem, 1fr) minmax(0, 52rem);
+      align-items: start;
+      column-gap: var(--space-l);
+    }
+
+    .piece__noscript {
+      grid-column: 1 / -1;
+    }
+  }
 </style>

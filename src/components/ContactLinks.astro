@@ -1,13 +1,18 @@
 ---
-// Plain links, no JavaScript (FR-003). `compact` is the icon row in the landing hero;
-// `footer` (default) is the labelled list in every page footer.
+// Plain links, no JavaScript (FR-003). `footer` (default) is the labelled list in every page
+// footer, also used in the landing hero without email (the hero has its own "Email me" button);
+// `compact` is an icon-only row.
 import { getEntry } from 'astro:content';
+
+type LinkId = 'email' | 'github' | 'linkedin';
 
 interface Props {
   variant?: 'footer' | 'compact';
+  /** Links to leave out. */
+  omit?: LinkId[];
 }
 
-const { variant = 'footer' } = Astro.props;
+const { variant = 'footer', omit = [] } = Astro.props;
 const author = await getEntry('profile', 'author');
 if (!author) throw new Error('ContactLinks: src/data/profile.yaml must define `author`.');
 const { name, contact } = author.data;
@@ -16,7 +21,7 @@ const links = [
   { id: 'email', href: `mailto:${contact.email}`, label: 'Email', text: contact.email, name: `Email ${name}` },
   { id: 'github', href: contact.github, label: 'GitHub', text: 'GitHub', name: `${name} on GitHub` },
   { id: 'linkedin', href: contact.linkedin, label: 'LinkedIn', text: 'LinkedIn', name: `${name} on LinkedIn` },
-] as const;
+].filter((link) => !omit.includes(link.id as LinkId));
 ---
 
 <ul class:list={['contact', `contact--${variant}`]} role="list">

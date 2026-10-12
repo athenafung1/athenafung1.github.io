@@ -31,7 +31,7 @@ const featured = selectFeatured(await getCollection('projects'), 3);
           View projects
         </a>
         <a class="button button--secondary" href={`mailto:${contact.email}`}>Email me</a>
-        <ContactLinks variant="compact" />
+        <ContactLinks omit={['email']} />
       </div>
     </div>
 
