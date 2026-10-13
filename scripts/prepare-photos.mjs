@@ -1,21 +1,41 @@
 #!/usr/bin/env node
-// Prepare original photos for the site:  node scripts/prepare-photos.mjs <folder of originals>
+// Prepare original photos for the site's photo displays (/photo-lab/).
 //
-// For each image it writes src/assets/photos/<id>.jpg: turned upright, at most 2000px on the long
-// side, with ALL metadata stripped (camera files carry GPS coordinates). What the pages need from
-// the original goes into src/data/photos-meta.json instead: the camera settings worth showing
-// (never the location), a five-colour palette with a "signature" colour, and a line drawing of the
-// photo's strongest edges for the harmonograph display. Titles and alt text are written by hand in
-// src/data/photos.json. The <id> is the file name in lower case with dashes.
-import { mkdir, readdir, writeFile } from 'node:fs/promises';
+//   node scripts/prepare-photos.mjs <photo or folder> [more photos or folders…]
+//   node scripts/prepare-photos.mjs --remove <id> [more ids…]
+//
+// ADDING A PHOTO
+//   1. Keep the original anywhere (it is not copied into the repo as is).
+//   2. Run:  node scripts/prepare-photos.mjs ~/Pictures/heron.jpg
+//      Only the photos you name are processed; every other photo already on the site is kept.
+//   3. Add it to src/data/photos.json, where it appears in the order you want it shown:
+//        { "id": "heron", "title": "Heron", "alt": "A grey heron standing in shallow water." }
+//      The script prints this line for you to fill in. "alt" describes the photo for people who
+//      can't see it; the build refuses a photo without one.
+//   4. Check it: npm run dev, then /photo-lab/film-drawn/.
+//
+// REPLACING A PHOTO: run the script on the new original with the same file name; its id stays the
+// same, so photos.json needs no change.
+// REMOVING A PHOTO: delete its line from src/data/photos.json, then run the script with --remove <id>
+// (deletes its prepared image and its entry in photos-meta.json).
+//
+// WHAT IT WRITES
+// For each photo, src/assets/photos/<id>.jpg: turned upright, at most 2000px on the long side, with
+// ALL metadata stripped (camera files carry GPS coordinates). What the pages need from the original
+// goes into src/data/photos-meta.json instead: the camera settings worth showing (never the
+// location), a five-colour palette with a "signature" colour, and a line drawing of the photo's
+// strongest edges for the harmonograph displays. The <id> is the file name in lower case with
+// dashes: "Funny Trees.JPG" → "funny-trees".
+import { existsSync } from 'node:fs';
+import { mkdir, readdir, readFile, stat, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const source = process.argv[2];
-if (!source) {
-  console.error('Usage: node scripts/prepare-photos.mjs <folder of original photos>');
+const args = process.argv.slice(2);
+if (!args.length) {
+  console.error('Usage: node scripts/prepare-photos.mjs <photo or folder> [more…]\n       node scripts/prepare-photos.mjs --remove <id> [more ids…]');
   process.exit(1);
 }
 const outDir = path.join(root, 'src/assets/photos');
@@ -347,16 +367,60 @@ async function lineDrawing(input) {
 }
 
 // ---------- Run ----------
-await mkdir(outDir, { recursive: true });
-const files = (await readdir(source)).filter((f) => /\.(jpe?g|png|webp|tiff?)$/i.test(f)).sort();
-const meta = {};
-for (const file of files) {
-  const id = path
+const metaFile = path.join(root, 'src/data/photos-meta.json');
+const listFile = path.join(root, 'src/data/photos.json');
+const IMAGE = /\.(jpe?g|png|webp|tiff?)$/i;
+
+/** "Funny Trees.JPG" → "funny-trees". */
+const idOf = (file) =>
+  path
     .parse(file)
     .name.toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
-  const input = path.join(source, file);
+
+// Start from what is already there, so naming one photo never drops the others.
+const meta = existsSync(metaFile) ? JSON.parse(await readFile(metaFile, 'utf8')) : {};
+
+async function save() {
+  // Indented for reading, but arrays of numbers (the traces) on one line each.
+  const json = JSON.stringify(meta, null, 2).replace(/\[\s*(-?\d[\d.,\s-]*?)\s*\]/g, (_, list) => `[${list.replace(/\s+/g, '')}]`);
+  await writeFile(metaFile, `${json}\n`);
+}
+
+if (args[0] === '--remove') {
+  for (const id of args.slice(1)) {
+    const image = path.join(outDir, `${id}.jpg`);
+    if (!meta[id] && !existsSync(image)) {
+      console.error(`No photo "${id}" to remove.`);
+      continue;
+    }
+    delete meta[id];
+    if (existsSync(image)) await unlink(image);
+    console.log(`removed ${id}`);
+  }
+  await save();
+  process.exit(0);
+}
+
+// The originals: each argument is a photo, or a folder whose photos are all taken.
+const inputs = [];
+for (const arg of args) {
+  const info = await stat(arg).catch(() => null);
+  if (!info) {
+    console.error(`Not found: ${arg}`);
+    process.exit(1);
+  }
+  if (info.isDirectory()) {
+    for (const file of (await readdir(arg)).filter((f) => IMAGE.test(f)).sort()) inputs.push(path.join(arg, file));
+  } else if (IMAGE.test(arg)) inputs.push(arg);
+  else console.error(`Skipped (not a JPEG, PNG, WebP or TIFF): ${arg}`);
+}
+
+await mkdir(outDir, { recursive: true });
+const done = [];
+for (const input of inputs) {
+  const id = idOf(input);
   const info = await sharp(input).metadata();
   const { camera, taken } = cameraLine(readExif(info.exif));
   // rotate() applies the EXIF orientation; sharp writes no metadata unless asked, so GPS is gone.
@@ -376,9 +440,16 @@ for (const file of files) {
     ...palette(pixels),
     trace: await lineDrawing(input),
   };
+  done.push(id);
   console.log(`${id}.jpg  ${out.width}×${out.height}  ${(out.size / 1024).toFixed(0)} KB  ${Object.values(camera).join('  ')}`);
 }
-// Indented for reading, but arrays of numbers (the traces) on one line each.
-const json = JSON.stringify(meta, null, 2).replace(/\[\s*(-?\d[\d.,\s-]*?)\s*\]/g, (_, list) => `[${list.replace(/\s+/g, '')}]`);
-await writeFile(path.join(root, 'src/data/photos-meta.json'), `${json}\n`);
-console.log(`src/data/photos-meta.json  ${files.length} photos`);
+await save();
+console.log(`src/data/photos-meta.json  ${done.length} prepared, ${Object.keys(meta).length} photos in all`);
+
+// What's left to do by hand: list new photos in photos.json (with a title and alt text).
+const listed = new Set(JSON.parse(await readFile(listFile, 'utf8').catch(() => '[]')).map((photo) => photo.id));
+const unlisted = done.filter((id) => !listed.has(id));
+if (unlisted.length) {
+  console.log('\nNot shown yet. Add to src/data/photos.json, with a title and a description for "alt":');
+  for (const id of unlisted) console.log(`  { "id": "${id}", "title": "", "alt": "" },`);
+}

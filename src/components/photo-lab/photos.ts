@@ -1,6 +1,7 @@
 // Build-time: the photos for the photo-display prototypes (/photo-lab/). Joins the hand-written
 // titles and alt text (src/data/photos.json) with what scripts/prepare-photos.mjs measured
 // (src/data/photos-meta.json) and the processed images (src/assets/photos/, metadata stripped).
+// To add, replace or remove a photo, see the top of scripts/prepare-photos.mjs (or the README).
 import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
 import authored from '../../data/photos.json';

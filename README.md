@@ -68,6 +68,7 @@ field stops the build with a message naming the file and field. Full formats and
 | Navigation | `src/data/nav.yaml` (the only place navigation is defined) |
 | A project | `src/content/projects/<slug>.md` |
 | An interest on the Fun page | `src/content/interests/<slug>.md` |
+| A photo (photo displays, `/photo-lab/`) | `node scripts/prepare-photos.mjs <photo>`, then `src/data/photos.json` |
 
 Any text starting with `DRAFT:` is a stand-in. `node scripts/check-content.mjs` fails while any
 remains (including in the stand-in resume), so drafts can't be deployed.
@@ -90,6 +91,39 @@ card links to it. No navigation change is needed.
 Create `src/content/interests/<slug>.md` with `title`, `order` and an optional `category`,
 `images` (stored next to the file, each with `alt`) and `links` (`video`, `audio`, `writing` or
 `other`; links only, never embeds). The body is the write-up, 1–150 words.
+
+### Adding a photo
+
+Photos are prepared by a script, which shrinks each one, strips its metadata (including GPS
+location) and measures what the displays need. The original is not copied into the repo.
+
+1. Run the script on the original, from anywhere on your computer:
+
+   ```sh
+   node scripts/prepare-photos.mjs ~/Pictures/heron.jpg
+   ```
+
+   Only the photos you name are processed; the ones already on the site are kept. It writes
+   `src/assets/photos/heron.jpg` and the photo's entry in `src/data/photos-meta.json`. The id comes
+   from the file name: `Funny Trees.JPG` becomes `funny-trees`.
+
+2. Add the photo to `src/data/photos.json` (the script prints this line ready to fill in). Its place
+   in the list is its place on the page:
+
+   ```json
+   { "id": "heron", "title": "Heron", "alt": "A grey heron standing in shallow water." }
+   ```
+
+   `alt` describes the photo for people who can't see it; the build refuses a photo without one.
+
+3. Check it with `npm run dev` at `/photo-lab/film-drawn/`.
+
+To **replace** a photo, run the script on the new original with the same file name; nothing else
+changes. To **remove** one, delete its line from `src/data/photos.json`, then run
+`node scripts/prepare-photos.mjs --remove heron`, which deletes its prepared image and data.
+
+Camera settings and dates are saved but hidden; turn them on with `SHOW_CAMERA` and `SHOW_DATE`
+in `src/components/photo-lab/photos.ts`.
 
 ### Adding a page
 
