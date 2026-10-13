@@ -1,0 +1,171 @@
+---
+// Contact sheet: the photos as frames on a strip of film, in the order they were taken, numbered
+// like film frames. A loupe follows the mouse and magnifies the frame under it; every frame links
+// to the full-screen viewer.
+import Picture from '../Picture.astro';
+import PhotoLightbox from './PhotoLightbox.astro';
+import { takenLabel, type Photo } from './photos.ts';
+
+interface Props {
+  photos: Photo[];
+}
+
+// Oldest first, as a roll would be.
+const photos = [...Astro.props.photos].sort((a, b) => (a.taken ?? '').localeCompare(b.taken ?? ''));
+---
+
+<div class="sheet" data-sheet>
+  <ol class="sheet__frames" role="list">
+    {
+      photos.map((photo, index) => (
+        <li class="frame">
+          <a class="frame__link" href={photo.full} data-photo-open={index} data-loupe={photo.medium}>
+            <Picture src={photo.image} alt={photo.alt} widths={[320, 480, 640]} sizes="(min-width: 64rem) 15rem, 45vw" class="frame__img" />
+          </a>
+          <p class="frame__edge">
+            <span class="frame__no">{String(index + 1).padStart(2, '0')}</span>
+            <span>{photo.title}</span>
+            {takenLabel(photo.taken) && <span class="frame__date">{takenLabel(photo.taken)}</span>}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+  <div class="loupe" aria-hidden="true" data-loupe-lens></div>
+</div>
+<PhotoLightbox photos={photos} />
+
+<script>
+  // The loupe: a round lens that follows the mouse over a frame and shows that spot at 2.5×.
+  const ZOOM = 2.5;
+  const sheet = document.querySelector<HTMLElement>('[data-sheet]');
+  const lens = document.querySelector<HTMLElement>('[data-loupe-lens]');
+  if (sheet && lens && matchMedia('(hover: hover) and (pointer: fine)').matches) {
+    let current: HTMLElement | null = null;
+    sheet.addEventListener('pointermove', (event) => {
+      const link = (event.target as Element).closest<HTMLElement>('[data-loupe]');
+      const img = link?.querySelector('img');
+      if (!link || !img) {
+        lens.classList.remove('is-on');
+        current = null;
+        return;
+      }
+      if (current !== link) {
+        current = link;
+        lens.style.backgroundImage = `url("${link.dataset.loupe}")`;
+      }
+      // Magnify the picture as drawn (object-fit: contain leaves bands around tall frames).
+      const box = img.getBoundingClientRect();
+      const ratio = img.naturalWidth / img.naturalHeight || box.width / box.height;
+      const drawnW = Math.min(box.width, box.height * ratio);
+      const drawnH = drawnW / ratio;
+      const left = box.left + (box.width - drawnW) / 2;
+      const top = box.top + (box.height - drawnH) / 2;
+      const x = event.clientX - left;
+      const y = event.clientY - top;
+      if (x < 0 || y < 0 || x > drawnW || y > drawnH) {
+        lens.classList.remove('is-on');
+        return;
+      }
+      const sheetBox = sheet.getBoundingClientRect();
+      const size = lens.offsetWidth;
+      lens.style.transform = `translate(${event.clientX - sheetBox.left - size / 2}px, ${event.clientY - sheetBox.top - size / 2}px)`;
+      lens.style.backgroundSize = `${drawnW * ZOOM}px ${drawnH * ZOOM}px`;
+      lens.style.backgroundPosition = `${size / 2 - x * ZOOM}px ${size / 2 - y * ZOOM}px`;
+      lens.classList.add('is-on');
+    });
+    sheet.addEventListener('pointerleave', () => lens.classList.remove('is-on'));
+  }
+</script>
+
+<style>
+  /* Film base: near-black whatever the theme, like the real thing. */
+  .sheet {
+    --film: light-dark(#1b201d, #0e1210);
+    --edge: #b7c48c;
+    position: relative;
+    padding: var(--space-m);
+    border-radius: var(--radius-s);
+    background: var(--film);
+  }
+
+  .sheet__frames {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 13rem), 1fr));
+    gap: var(--space-s) var(--space-xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .frame {
+    display: grid;
+    gap: var(--space-3xs);
+  }
+
+  .frame__link {
+    display: block;
+    aspect-ratio: 3 / 2;
+    border: 1px solid rgb(255 255 255 / 0.12);
+    background: #000;
+    cursor: zoom-in;
+  }
+
+  /* The <picture> around the image fills the box, so the image's 100% height has something to fill. */
+  .frame__link :global(picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .frame__link :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .frame__link:focus-visible {
+    outline-offset: 2px;
+  }
+
+  /* Printed along the film's edge: frame number, title, month. */
+  .frame__edge {
+    display: flex;
+    gap: var(--space-2xs);
+    overflow: hidden;
+    color: var(--edge);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .frame__no {
+    font-weight: 600;
+  }
+
+  .frame__date {
+    margin-inline-start: auto;
+    opacity: 0.8;
+  }
+
+  .loupe {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    z-index: 3;
+    width: 13rem;
+    aspect-ratio: 1;
+    border: 3px solid #f4f6f1;
+    border-radius: 50%;
+    background-color: #000;
+    background-repeat: no-repeat;
+    box-shadow: 0 0.6rem 1.6rem rgb(0 0 0 / 0.45);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  .loupe.is-on {
+    opacity: 1;
+  }
+</style>

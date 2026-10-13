@@ -1,0 +1,131 @@
+---
+// Drawn by the harmonograph: as each photo comes into view, a chain of spinning circles traces a
+// line drawing of it on blank paper, then the photo develops underneath (plate-drawing.ts). Without
+// JavaScript, or with reduced motion, the photos simply show.
+import DrawnPlate from './DrawnPlate.astro';
+import PhotoLightbox from './PhotoLightbox.astro';
+import { cameraParts, type Photo } from './photos.ts';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+---
+
+<ol class="drawn" role="list">
+  {
+    photos.map((photo, index) => (
+      <li class="drawn__item">
+        <DrawnPlate photo={photo} index={index} sizes="(min-width: 64rem) 36rem, 100vw" />
+        <div class="drawn__caption">
+          <p class="drawn__title">{photo.title}</p>
+          {cameraParts(photo.camera).length > 0 && (
+            <p class="drawn__meta">
+              {cameraParts(photo.camera).map((part) => (
+                <span>{part}</span>
+              ))}
+            </p>
+          )}
+          <button type="button" class="drawn__redraw" data-redraw hidden>
+            Redraw
+          </button>
+        </div>
+      </li>
+    ))
+  }
+</ol>
+<PhotoLightbox photos={photos} />
+
+<script>
+  import { PlateDrawing, prefersStill } from './plate-drawing.ts';
+
+  if (!prefersStill()) {
+    const plates = new Map<Element, PlateDrawing>();
+    // Fetch each photo's drawing a little before it arrives; draw it once most of it is on screen.
+    const near = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          near.unobserve(entry.target);
+          plates.get(entry.target)?.load();
+        }
+      },
+      { rootMargin: '50% 0px' },
+    );
+    const seen = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          seen.unobserve(entry.target);
+          plates.get(entry.target)?.begin();
+        }
+      },
+      { threshold: 0.55 },
+    );
+    for (const figure of document.querySelectorAll<HTMLElement>('[data-plate]')) {
+      const redraw = figure.closest('li')?.querySelector<HTMLButtonElement>('[data-redraw]');
+      const plate = new PlateDrawing(figure, {
+        drawMs: 6500,
+        onChange: (p) => {
+          if (redraw) redraw.hidden = p.state !== 'developed';
+        },
+      });
+      plates.set(figure, plate);
+      near.observe(figure);
+      seen.observe(figure);
+      redraw?.addEventListener('click', () => plate.begin());
+    }
+  }
+</script>
+
+<style>
+  .drawn {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 26rem), 1fr));
+    gap: var(--space-xl) var(--space-l);
+    align-items: start;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .drawn__item {
+    display: grid;
+    gap: var(--space-xs);
+  }
+
+  .drawn__caption {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-3xs) var(--space-s);
+  }
+
+  .drawn__title {
+    font-family: var(--font-display);
+    font-size: var(--step-1);
+    font-weight: 600;
+  }
+
+  .drawn__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .drawn__redraw {
+    margin-inline-start: auto;
+    min-height: 2.25rem;
+    padding-inline: var(--space-xs);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    font-size: var(--step--1);
+    font-weight: 600;
+    cursor: pointer;
+  }
+</style>

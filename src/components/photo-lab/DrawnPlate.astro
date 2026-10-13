@@ -1,0 +1,117 @@
+---
+// One photo that the harmonograph draws before it develops (behaviour in plate-drawing.ts). Without
+// JavaScript, or with reduced motion, it is simply the photo. The script marks it is-waiting (blank
+// paper with the site's rose in the middle, so it reads as a photo still to come), is-drawing (paper
+// with the drawing on it) or is-developed (the photo).
+import Picture from '../Picture.astro';
+import { rose, toSvgPath } from '../../lib/curves.ts';
+import type { Photo } from './photos.ts';
+
+interface Props {
+  photo: Photo;
+  /** Its place in the page's photos, for the full-screen viewer. */
+  index: number;
+  sizes: string;
+  eager?: boolean;
+}
+
+const { photo, index, sizes, eager = false } = Astro.props;
+// The site mark: a five-petal rose, one petal up (as in SiteHeader).
+const mark = toSvgPath(
+  rose(5, 120).map((p) => ({ x: p.y, y: -p.x })),
+  { closed: true },
+);
+---
+
+<figure class="plate" data-plate data-trace={photo.traceUrl} data-aspect={photo.width / photo.height} style={`aspect-ratio: ${photo.width} / ${photo.height}`}>
+  <a class="plate__link" href={photo.full} data-photo-open={index}>
+    <Picture src={photo.image} alt={photo.alt} widths={[480, 640, 960, 1280]} sizes={sizes} eager={eager} />
+  </a>
+  <canvas class="plate__canvas" aria-hidden="true"></canvas>
+  <svg class="plate__cue" viewBox="-1.15 -1.15 2.3 2.3" aria-hidden="true" focusable="false">
+    <path d={mark}></path>
+  </svg>
+</figure>
+
+<style>
+  .plate {
+    position: relative;
+    margin: 0;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    background: var(--color-surface);
+  }
+
+  .plate__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: zoom-in;
+  }
+
+  /* The <picture> around the image fills the box, so the image's 100% height has something to fill. */
+  .plate__link :global(picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .plate__link :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      opacity 0.9s var(--ease),
+      filter 1.4s var(--ease);
+  }
+
+  .plate__canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.9s var(--ease);
+  }
+
+  /* Waiting: blank paper with the rose in the middle. Drawing: paper with the drawing on it, the
+     photo hidden beneath. Developed: the photo comes up and the drawing fades away. */
+  .plate__cue {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 50%;
+    width: clamp(2rem, 14%, 3.5rem);
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+
+  .plate__cue path {
+    fill: none;
+    stroke: var(--color-curve);
+    stroke-width: 0.12;
+    stroke-linejoin: round;
+  }
+
+  .plate.is-waiting .plate__cue {
+    opacity: 1;
+  }
+
+  .plate.is-waiting .plate__link :global(img),
+  .plate.is-drawing .plate__link :global(img) {
+    opacity: 0;
+    filter: contrast(0.6) brightness(1.3);
+  }
+
+  .plate.is-drawing .plate__canvas {
+    opacity: 1;
+  }
+
+  .plate.is-developed .plate__link :global(img) {
+    opacity: 1;
+    filter: none;
+  }
+</style>

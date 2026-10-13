@@ -1,0 +1,83 @@
+---
+// Justified rows: each photo at its own shape, packed into rows that fill the width. Pure CSS: every
+// item grows in proportion to its aspect ratio from a target row height, so a row's photos share
+// one height; a spacer stops the last row from stretching. Click a photo for the full-screen viewer.
+import Picture from '../Picture.astro';
+import PhotoLightbox from './PhotoLightbox.astro';
+import type { Photo } from './photos.ts';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+---
+
+<ul class="rows" role="list">
+  {
+    photos.map((photo, index) => (
+      <li class="rows__item" style={`--ratio: ${(photo.width / photo.height).toFixed(4)}`}>
+        <a class="rows__link" href={photo.full} data-photo-open={index}>
+          <Picture src={photo.image} alt={photo.alt} widths={[320, 480, 640, 960, 1280]} sizes="(min-width: 64rem) 40vw, 90vw" />
+        </a>
+      </li>
+    ))
+  }
+</ul>
+<PhotoLightbox photos={photos} />
+
+<style>
+  .rows {
+    --row: clamp(9rem, 22vw, 17rem);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Grow in proportion to width-per-height from a basis of one row-height's worth. */
+  .rows__item {
+    flex: calc(var(--ratio) * 100) 1 calc(var(--ratio) * var(--row));
+    aspect-ratio: var(--ratio);
+  }
+
+  /* Soaks up the last row's spare width so its photos keep the target height. */
+  .rows::after {
+    content: '';
+    flex: 1e4 1 0;
+  }
+
+  .rows__link {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    cursor: zoom-in;
+  }
+
+  /* The <picture> around the image fills the box, so the image's 100% height has something to fill. */
+  .rows__link :global(picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .rows__link :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (hover: hover) {
+    .rows__link :global(img) {
+      transition: opacity var(--dur-fast) var(--ease);
+    }
+
+    .rows:has(.rows__link:hover) .rows__link:not(:hover) :global(img) {
+      opacity: 0.7;
+    }
+  }
+</style>

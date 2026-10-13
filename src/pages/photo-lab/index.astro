@@ -1,0 +1,111 @@
+---
+// Index of the photo-display prototypes (test branch only; not in the nav, not indexed).
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Picture from '../../components/Picture.astro';
+import { PHOTO_DISPLAYS } from '../../components/photo-lab/displays.ts';
+import { loadPhotos } from '../../components/photo-lab/photos.ts';
+
+const photos = await loadPhotos();
+// A different photo on each card, just to tell them apart.
+const covers = ['carmel-landscape', 'plant-portrait', 'sausalito', 'surf', 'snow-landscape', 'eclectus-parrot', 'palms'];
+const cover = (i: number) => photos.find((photo) => photo.id === covers[i % covers.length]) ?? photos[0];
+---
+
+<BaseLayout
+  title="Photo lab · Athena Fung"
+  description="Prototype ways to show photography on the Fun page, all using the same eleven photos."
+  noindex
+>
+  <header class="lab-head">
+    <h1 class="lab-head__title">Photo displays</h1>
+    <p class="lab-head__intro">
+      Seven ways to show the same {photos.length} photos on the Fun page. Each has its own page, and every one opens a photo
+      full screen with its camera settings when you click it.
+    </p>
+  </header>
+
+  <ol class="cards" role="list">
+    {
+      PHOTO_DISPLAYS.map((display, i) => (
+        <li class="card">
+          <a class="card__link" href={`/photo-lab/${display.slug}/`}>
+            <span class="card__cover">
+              <Picture src={cover(i).image} alt="" decorative widths={[320, 480, 640]} sizes="(min-width: 64rem) 22rem, 90vw" />
+            </span>
+            <span class="card__name">{display.name}</span>
+          </a>
+          <p class="card__idea">{display.idea}</p>
+        </li>
+      ))
+    }
+  </ol>
+</BaseLayout>
+
+<style>
+  .lab-head {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+    margin-block-end: var(--space-xl);
+  }
+
+  .lab-head__title {
+    font-size: var(--step-5);
+  }
+
+  .lab-head__intro {
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-l) var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .card {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  .card__link {
+    display: grid;
+    gap: var(--space-xs);
+    text-decoration: none;
+  }
+
+  .card__cover {
+    display: block;
+    aspect-ratio: 3 / 2;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+  }
+
+  /* The <picture> around the image fills the box, so the image's 100% height has something to fill. */
+  .card__cover :global(picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .card__cover :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .card__name {
+    font-family: var(--font-display);
+    font-size: var(--step-2);
+    font-weight: 600;
+  }
+
+  .card__idea {
+    color: var(--color-muted);
+  }
+</style>

@@ -1,0 +1,203 @@
+---
+// Light table: prints scattered across a table, a little askew and overlapping. Drag a print to
+// move it (it comes to the top); click one to open it. Positions are seeded, so the scatter is the
+// same on every visit. Narrow screens lay the prints out in a loose column instead.
+import Picture from '../Picture.astro';
+import PhotoLightbox from './PhotoLightbox.astro';
+import { mulberry32 } from '../../lib/random.ts';
+import type { Photo } from './photos.ts';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+// A loose grid with jitter, so every print shows somewhere but none sits square.
+const random = mulberry32(11);
+const cols = 4;
+const rows = Math.ceil(photos.length / cols);
+const placed = photos.map((photo, index) => {
+  const col = index % cols;
+  const row = Math.floor(index / cols);
+  const portrait = photo.height > photo.width;
+  return {
+    photo,
+    index,
+    portrait,
+    left: ((col + 0.08 + random() * 0.3) / cols) * 100,
+    top: ((row + 0.05 + random() * 0.25) / rows) * 100,
+    turn: (random() * 2 - 1) * 7,
+  };
+});
+---
+
+<div class="table" data-table>
+  <ul class="table__prints" role="list">
+    {
+      placed.map(({ photo, index, portrait, left, top, turn }) => (
+        <li class:list={['print', { 'print--portrait': portrait }]} style={`--x: ${left.toFixed(1)}%; --y: ${top.toFixed(1)}%; --turn: ${turn.toFixed(1)}deg; --z: ${index + 1}`}>
+          <a class="print__link" href={photo.full} data-photo-open={index} draggable="false">
+            <Picture src={photo.image} alt={photo.alt} widths={[320, 480, 640]} sizes={portrait ? '11rem' : '17rem'} />
+            <span class="print__title">{photo.title}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</div>
+<PhotoLightbox photos={photos} />
+
+<script>
+  // Drag to move; a press that barely moves is a click and opens the viewer. Only on the wide
+  // layout, where prints are positioned on the table.
+  const table = document.querySelector<HTMLElement>('[data-table]');
+  // Prints are positioned in percent of this area, so drags are measured against it too.
+  const area = table?.querySelector<HTMLElement>('.table__prints');
+  const wide = matchMedia('(min-width: 48rem)');
+  if (table && area) {
+    let top = table.querySelectorAll('.print').length + 1;
+    let drag: { print: HTMLElement; id: number; x: number; y: number; left: number; top: number; moved: boolean } | null = null;
+    // After a real drag, the click that comes with letting go mustn't open the viewer. It is
+    // swallowed here, before it can reach the viewer's listener; a new press always resets this.
+    let swallowClick = false;
+    table.addEventListener(
+      'click',
+      (event) => {
+        if (!swallowClick) return;
+        swallowClick = false;
+        event.preventDefault();
+        event.stopPropagation();
+      },
+      true,
+    );
+
+    table.addEventListener('pointerdown', (event) => {
+      swallowClick = false;
+      if (!wide.matches || event.button !== 0) return;
+      const print = (event.target as Element).closest<HTMLElement>('.print');
+      if (!print) return;
+      print.style.setProperty('--z', String(++top));
+      drag = { print, id: event.pointerId, x: event.clientX, y: event.clientY, left: print.offsetLeft, top: print.offsetTop, moved: false };
+    });
+
+    table.addEventListener('pointermove', (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const dx = event.clientX - drag.x;
+      const dy = event.clientY - drag.y;
+      if (!drag.moved && Math.hypot(dx, dy) < 5) return;
+      // Capture only once it's a drag: capturing on press would send a plain click to the print
+      // rather than the link inside it, and the viewer would never open.
+      if (!drag.moved) drag.print.setPointerCapture(event.pointerId);
+      drag.moved = true;
+      drag.print.classList.add('is-lifted');
+      // Keep at least part of the print on the table.
+      const maxX = area.clientWidth - 40;
+      const maxY = area.clientHeight - 40;
+      const x = Math.min(maxX, Math.max(-drag.print.offsetWidth + 40, drag.left + dx));
+      const y = Math.min(maxY, Math.max(-drag.print.offsetHeight + 40, drag.top + dy));
+      drag.print.style.setProperty('--x', `${(x / area.clientWidth) * 100}%`);
+      drag.print.style.setProperty('--y', `${(y / area.clientHeight) * 100}%`);
+    });
+
+    const drop = (event: PointerEvent) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      if (drag.moved) swallowClick = true;
+      drag.print.classList.remove('is-lifted');
+      drag = null;
+    };
+    table.addEventListener('pointerup', drop);
+    table.addEventListener('pointercancel', drop);
+  }
+</script>
+
+<style>
+  .table {
+    padding: var(--space-m);
+    border-radius: var(--radius-m);
+    background: light-dark(#e3e7df, #2a312c);
+  }
+
+  .table__prints {
+    display: grid;
+    gap: var(--space-l);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Narrow screens: a loose column of slightly turned prints. */
+  .print {
+    justify-self: center;
+    width: min(100%, 22rem);
+    rotate: calc(var(--turn) * 0.4);
+  }
+
+  .print--portrait {
+    width: min(70%, 15rem);
+  }
+
+  .print__link {
+    display: grid;
+    gap: var(--space-2xs);
+    padding: 0.55rem 0.55rem 0.4rem;
+    background: light-dark(#fbfcf9, #e8ebe4);
+    box-shadow:
+      0 1px 2px rgb(0 0 0 / 0.18),
+      0 0.6rem 1.4rem rgb(0 0 0 / 0.16);
+    color: #3d453f;
+    text-decoration: none;
+    cursor: zoom-in;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  .print__link :global(img) {
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+  }
+
+  .print__title {
+    font-size: var(--step--1);
+  }
+
+  /* Wide screens: scattered across a table, draggable. */
+  @media (min-width: 48rem) {
+    .table__prints {
+      position: relative;
+      display: block;
+      height: clamp(34rem, 62vw, 46rem);
+    }
+
+    .print {
+      position: absolute;
+      inset-inline-start: var(--x);
+      inset-block-start: var(--y);
+      z-index: var(--z);
+      width: 17rem;
+      rotate: var(--turn);
+      cursor: grab;
+      touch-action: none;
+      transition:
+        rotate var(--dur) var(--ease),
+        scale var(--dur) var(--ease);
+    }
+
+    .print--portrait {
+      width: 11rem;
+    }
+
+    .print.is-lifted {
+      cursor: grabbing;
+      scale: 1.04;
+      rotate: calc(var(--turn) * 0.5);
+    }
+
+    .print.is-lifted .print__link {
+      box-shadow:
+        0 2px 4px rgb(0 0 0 / 0.2),
+        0 1.2rem 2.4rem rgb(0 0 0 / 0.22);
+    }
+  }
+</style>

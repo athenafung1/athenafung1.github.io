@@ -1,0 +1,165 @@
+---
+// Colour spectrum: each photo's five main colours (measured by scripts/prepare-photos.mjs) as a
+// stripe in a band, ordered by the hue of each photo's signature colour, with the photos below in
+// the same order. Pointing at a stripe lights its photo and the other way round.
+import Picture from '../Picture.astro';
+import PhotoLightbox from './PhotoLightbox.astro';
+import type { Photo } from './photos.ts';
+
+interface Props {
+  photos: Photo[];
+}
+
+// Round the colour wheel starting at orange, so warm and green photos lead into the blues.
+const START = 30;
+const photos = [...Astro.props.photos].sort((a, b) => ((a.hue - START + 360) % 360) - ((b.hue - START + 360) % 360));
+---
+
+<div class="spectrum" data-spectrum>
+  <ol class="spectrum__band" role="list" aria-label="Each photo's main colours, in the same order as the photos">
+    {
+      photos.map((photo, index) => (
+        <li class="stripe" data-pair={index} title={photo.title}>
+          {photo.palette.map((colour) => (
+            <span class="stripe__colour" style={`--c: ${colour.hex}; --share: ${colour.share}`} />
+          ))}
+          <span class="visually-hidden">{photo.title}</span>
+        </li>
+      ))
+    }
+  </ol>
+
+  <ol class="spectrum__photos" role="list">
+    {
+      photos.map((photo, index) => (
+        <li class="swatch" data-pair={index} style={`--signature: ${photo.signature}`}>
+          <a class="swatch__link" href={photo.full} data-photo-open={index}>
+            <Picture src={photo.image} alt={photo.alt} widths={[320, 480, 640, 960]} sizes="(min-width: 64rem) 22rem, (min-width: 40rem) 45vw, 100vw" />
+          </a>
+          <p class="swatch__caption">
+            <span class="swatch__chip" aria-hidden="true" />
+            {photo.title}
+          </p>
+        </li>
+      ))
+    }
+  </ol>
+</div>
+<PhotoLightbox photos={photos} />
+
+<script>
+  // Pointing at (or focusing) a stripe or a photo lights both halves of the pair.
+  const root = document.querySelector<HTMLElement>('[data-spectrum]');
+  if (root) {
+    const light = (pair: string | null) => {
+      root.classList.toggle('is-pairing', pair !== null);
+      for (const el of root.querySelectorAll<HTMLElement>('[data-pair]')) el.classList.toggle('is-paired', el.dataset.pair === pair);
+    };
+    const pairOf = (target: EventTarget | null) => (target as Element | null)?.closest<HTMLElement>('[data-pair]')?.dataset.pair ?? null;
+    root.addEventListener('pointerover', (event) => light(pairOf(event.target)));
+    root.addEventListener('pointerleave', () => light(null));
+    root.addEventListener('focusin', (event) => light(pairOf(event.target)));
+    root.addEventListener('focusout', () => light(null));
+  }
+</script>
+
+<style>
+  .spectrum {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  /* One column per photo, its palette stacked by how much of the frame each colour covers. */
+  .spectrum__band {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    gap: 3px;
+    height: clamp(5rem, 14vw, 9rem);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .stripe {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border-radius: 2px;
+    transition:
+      opacity var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+
+  .stripe__colour {
+    flex: var(--share) 1 0;
+    background: var(--c);
+  }
+
+  .spectrum__photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+    gap: var(--space-m) var(--space-s);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .swatch {
+    display: grid;
+    gap: var(--space-2xs);
+    transition: opacity var(--dur-fast) var(--ease);
+  }
+
+  .swatch__link {
+    display: block;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    border-radius: var(--radius-s);
+    border-block-end: 6px solid var(--signature);
+    cursor: zoom-in;
+  }
+
+  /* The <picture> around the image fills the box, so the image's 100% height has something to fill. */
+  .swatch__link :global(picture) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .swatch__link :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .swatch__caption {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-size: var(--step--1);
+    color: var(--color-muted);
+  }
+
+  .swatch__chip {
+    width: 0.8em;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--signature);
+  }
+
+  .is-pairing .stripe:not(.is-paired),
+  .is-pairing .swatch:not(.is-paired) {
+    opacity: 0.35;
+  }
+
+  .stripe.is-paired {
+    transform: translateY(-4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .stripe.is-paired {
+      transform: none;
+    }
+  }
+</style>

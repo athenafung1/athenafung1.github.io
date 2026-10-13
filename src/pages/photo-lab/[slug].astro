@@ -1,0 +1,94 @@
+---
+// One photo-display prototype (test branch only; not in the nav, not indexed). The display sits in
+// a Photography section, as it would on the Fun page.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ColorSpectrum from '../../components/photo-lab/ColorSpectrum.astro';
+import ContactSheet from '../../components/photo-lab/ContactSheet.astro';
+import FilmStrip from '../../components/photo-lab/FilmStrip.astro';
+import HarmonographDrawn from '../../components/photo-lab/HarmonographDrawn.astro';
+import JustifiedRows from '../../components/photo-lab/JustifiedRows.astro';
+import LightTable from '../../components/photo-lab/LightTable.astro';
+import { PHOTO_DISPLAYS, type PhotoDisplay } from '../../components/photo-lab/displays.ts';
+import { loadPhotos } from '../../components/photo-lab/photos.ts';
+
+export function getStaticPaths() {
+  return PHOTO_DISPLAYS.map((display, index) => ({ params: { slug: display.slug }, props: { display, index } }));
+}
+
+const { display, index } = Astro.props as { display: PhotoDisplay; index: number };
+const photos = await loadPhotos();
+const previous = PHOTO_DISPLAYS[(index - 1 + PHOTO_DISPLAYS.length) % PHOTO_DISPLAYS.length];
+const next = PHOTO_DISPLAYS[(index + 1) % PHOTO_DISPLAYS.length];
+const DISPLAYS = {
+  'contact-sheet': ContactSheet,
+  spectrum: ColorSpectrum,
+  harmonograph: HarmonographDrawn,
+  'light-table': LightTable,
+  'film-strip': FilmStrip,
+  'film-drawn': FilmStrip,
+  justified: JustifiedRows,
+} as const;
+const Display = DISPLAYS[display.slug as keyof typeof DISPLAYS];
+---
+
+<BaseLayout
+  title={`${display.name} · Photo lab · Athena Fung`}
+  description={`Photo display prototype: ${display.idea}`.slice(0, 157).replace(/\s+\S*$/, '…')}
+  noindex
+>
+  <header class="lab-head">
+    <nav class="lab-nav" aria-label="Photo displays">
+      <a href="/photo-lab/">All displays</a>
+      <a href={`/photo-lab/${previous.slug}/`}>Previous: {previous.name}</a>
+      <a href={`/photo-lab/${next.slug}/`}>Next: {next.name}</a>
+    </nav>
+    <h1 class="lab-head__title">{display.name}</h1>
+    <p class="lab-head__idea">{display.idea}</p>
+    <p class="lab-head__hint">{display.hint}</p>
+  </header>
+
+  <section class="photography" aria-labelledby="photography-title">
+    <h2 id="photography-title" class="photography__title">Photography</h2>
+    <Display photos={photos} drawn={display.slug === 'film-drawn'} />
+  </section>
+</BaseLayout>
+
+<style>
+  .lab-head {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+    margin-block-end: var(--space-xl);
+  }
+
+  .lab-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-m);
+    margin-block-end: var(--space-s);
+    font-size: var(--step--1);
+  }
+
+  .lab-head__title {
+    font-size: var(--step-5);
+  }
+
+  .lab-head__idea {
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+
+  .lab-head__hint {
+    font-size: var(--step--1);
+    color: var(--color-muted);
+  }
+
+  .photography {
+    display: grid;
+    gap: var(--space-l);
+  }
+
+  .photography__title {
+    font-size: var(--step-3);
+  }
+</style>
