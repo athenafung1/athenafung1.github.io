@@ -5,6 +5,8 @@ import InterestEntry from '../components/InterestEntry.astro';
 import PieceFrame from '../components/PieceFrame.astro';
 import FourierFallback from '../components/FourierFallback.astro';
 import FourierSketch from '../islands/FourierSketch.svelte';
+import FilmStrip from '../components/photos/FilmStrip.astro';
+import { loadPhotos } from '../components/photos/photos.ts';
 import { PIECES } from '../islands/pieces.ts';
 import { countWords } from '../lib/content-rules.ts';
 
@@ -20,6 +22,7 @@ for (const entry of interests) {
 }
 
 const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
+const photos = await loadPhotos();
 ---
 
 <BaseLayout
@@ -39,6 +42,17 @@ const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
       <FourierFallback />
     </FourierSketch>
   </PieceFrame>
+
+  {
+    photos.length > 0 && (
+      <section class="section photography" aria-labelledby="photography-title">
+        <div class="section-head">
+          <h2 id="photography-title">Photography</h2>
+        </div>
+        <FilmStrip photos={photos} />
+      </section>
+    )
+  }
 
   <section class="section interests" aria-labelledby="interests-title">
     <div class="section-head">
@@ -74,6 +88,7 @@ const fourier = PIECES.find((piece) => piece.id === 'fourier-sketch')!;
     color: var(--color-muted);
   }
 
+  .photography,
   .interests {
     margin-block-start: var(--space-2xl);
   }

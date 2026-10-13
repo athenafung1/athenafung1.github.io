@@ -5,9 +5,9 @@ Personal portfolio site for Athena Fung.
 **Live at: https://athenafung1.github.io**
 
 Built with [Astro](https://astro.build) as a static site. Pages are plain HTML at runtime; the
-only JavaScript is a small theme/easter-egg script and two Svelte islands: the interactive piece on
-the Fun page, and the work-and-education timeline on the About page (its list is plain HTML, so it
-reads the same without JavaScript).
+only JavaScript is a small theme/easter-egg script, two Svelte islands (the interactive piece on
+the Fun page, and the work-and-education timeline on the About page) and the Fun page's photo
+strip. The timeline's list and the photos are plain HTML, so they read the same without JavaScript.
 
 ## Repository layout
 
@@ -19,7 +19,7 @@ reads the same without JavaScript).
 | `site/` | The previous hand-written site. Kept as a frozen record; no longer published, never edited. |
 | `archive/` | Frozen snapshots of earlier versions. Never published. |
 | `tests/unit/` | Vitest unit tests for everything in `src/lib/`. |
-| `scripts/` | `check-content.mjs` (post-build content gate) and `render-og.mjs` (sharing images). |
+| `scripts/` | `check-content.mjs` (post-build content gate), `render-og.mjs` (sharing images) and `prepare-photos.mjs` (photos for the Fun page). |
 | `.github/workflows/` | `pages.yml` (the one deploy path) and `checks.yml` (pull-request gates). |
 | `.specify/`, `specs/` | Spec Kit artifacts: the project constitution, feature spec, plan and tasks. |
 
@@ -68,6 +68,7 @@ field stops the build with a message naming the file and field. Full formats and
 | Navigation | `src/data/nav.yaml` (the only place navigation is defined) |
 | A project | `src/content/projects/<slug>.md` |
 | An interest on the Fun page | `src/content/interests/<slug>.md` |
+| A photo on the Fun page | `node scripts/prepare-photos.mjs <photo>`, then `src/data/photos.json` |
 
 Any text starting with `DRAFT:` is a stand-in. `node scripts/check-content.mjs` fails while any
 remains (including in the stand-in resume), so drafts can't be deployed.
@@ -90,6 +91,40 @@ card links to it. No navigation change is needed.
 Create `src/content/interests/<slug>.md` with `title`, `order` and an optional `category`,
 `images` (stored next to the file, each with `alt`) and `links` (`video`, `audio`, `writing` or
 `other`; links only, never embeds). The body is the write-up, 1–150 words.
+
+### Adding a photo
+
+Photos appear in the film strip under Photography on the Fun page. A script prepares each one: it
+shrinks it, strips its metadata (including GPS location) and measures what the strip needs,
+including the line drawing the harmonograph traces. The original is not copied into the repo.
+
+1. Run the script on the original, from anywhere on your computer:
+
+   ```sh
+   node scripts/prepare-photos.mjs ~/Pictures/heron.jpg
+   ```
+
+   Only the photos you name are processed; the ones already on the site are kept. It writes
+   `src/assets/photos/heron.jpg` and the photo's entry in `src/data/photos-meta.json`. The id comes
+   from the file name: `Funny Trees.JPG` becomes `funny-trees`.
+
+2. Add the photo to `src/data/photos.json` (the script prints this line ready to fill in). Its place
+   in the list is its place on the strip:
+
+   ```json
+   { "id": "heron", "title": "Heron", "alt": "A grey heron standing in shallow water." }
+   ```
+
+   `alt` describes the photo for people who can't see it; the build refuses a photo without one.
+
+3. Check it with `npm run dev` under Photography on `/fun/`.
+
+To **replace** a photo, run the script on the new original with the same file name; nothing else
+changes. To **remove** one, delete its line from `src/data/photos.json`, then run
+`node scripts/prepare-photos.mjs --remove heron`, which deletes its prepared image and data.
+
+Camera settings and dates are saved but hidden; turn them on with `SHOW_CAMERA` and `SHOW_DATE`
+in `src/components/photos/photos.ts`.
 
 ### Adding a page
 
