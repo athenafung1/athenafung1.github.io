@@ -22,16 +22,16 @@ const featured = selectFeatured(await getCollection('projects'), 3);
       <h1 id="hero-title" class="hero__name">{name}</h1>
       <p class="hero__role">{role}</p>
 
-      <ul class="hero__strengths" role="list" aria-label="Strengths">
+      <!-- <ul class="hero__strengths" role="list" aria-label="Strengths">
         {strengths.map((strength) => <li>{strength}</li>)}
-      </ul>
+      </ul> -->
 
       <div class="hero__actions">
         <a class="button button--primary" href="/projects/">
           View projects
         </a>
-        <a class="button button--secondary" href={`mailto:${contact.email}`}>Email me</a>
-        <ContactLinks omit={['email']} />
+        <!-- <a class="button button--secondary" href={`mailto:${contact.email}`}>Email me</a>
+        <ContactLinks omit={['email']} /> -->
       </div>
     </div>
 

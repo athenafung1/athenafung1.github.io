@@ -207,7 +207,8 @@
     gap: var(--space-l);
   }
 
-  /* Narrow screens: the drawing sticks to the top and the list scrolls under it. */
+  /* Narrow screens: the drawing sticks to the top and the list scrolls under it, kept short so most
+     of the screen is the list. */
   .timeline__visual {
     position: sticky;
     top: 0;
@@ -216,7 +217,7 @@
     grid-template-columns: minmax(0, 1fr); /* the one-line caption truncates instead of widening it */
     grid-template-rows: minmax(0, 1fr) auto;
     gap: var(--space-2xs);
-    height: 48svh;
+    height: 38svh;
     padding-block: var(--space-2xs);
     background: var(--color-bg);
     border-block-end: 1px solid var(--color-rule);
@@ -358,10 +359,11 @@
     color: var(--color-text);
   }
 
-  /* Wide screens: the drawing sits beside the list and stays in view while it scrolls. */
+  /* Wide screens: the drawing sits beside the list and stays in view while it scrolls; the list gets
+     the larger share so the content leads. */
   @media (min-width: 60rem) {
     .timeline {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
       align-items: start;
       column-gap: var(--space-xl);
     }
@@ -371,7 +373,7 @@
       grid-row: 1;
       top: var(--space-m);
       height: calc(100svh - 2 * var(--space-m));
-      max-height: 40rem; /* short enough to stay stuck until the footer, so the last state stays whole */
+      max-height: 34rem; /* short enough to stay stuck until the footer, so the last state stays whole */
       border: 0;
     }
 

@@ -18,7 +18,7 @@ if (!author) throw new Error('ContactLinks: src/data/profile.yaml must define `a
 const { name, contact } = author.data;
 
 const links = [
-  { id: 'email', href: `mailto:${contact.email}`, label: 'Email', text: contact.email, name: `Email ${name}` },
+  { id: 'email', href: `mailto:${contact.email}`, label: 'Email', text: 'Email', name: `Email ${name}` },
   { id: 'github', href: contact.github, label: 'GitHub', text: 'GitHub', name: `${name} on GitHub` },
   { id: 'linkedin', href: contact.linkedin, label: 'LinkedIn', text: 'LinkedIn', name: `${name} on LinkedIn` },
 ].filter((link) => !omit.includes(link.id as LinkId));
