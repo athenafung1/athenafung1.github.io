@@ -250,17 +250,22 @@
   {#if !mounted}
     {@render children?.()}
   {:else}
+    <!-- The canvas takes drawing input, so it is not a picture (role="img"); screen readers skip it and
+         hear the description in the hint below instead. Keyboard users have the presets, the slider and
+         the playback buttons. -->
     <canvas
       bind:this={canvas}
       class="sketch__canvas"
-      role="img"
-      aria-label="Fourier epicycles redrawing the selected shape. Draw on it with a mouse or finger to try your own."
+      aria-hidden="true"
       onpointerdown={onPointerDown}
       onpointermove={onPointerMove}
       onpointerup={onPointerUp}
       onpointercancel={onPointerUp}
     ></canvas>
-    <p class="sketch__hint">Draw a closed shape on the canvas, or pick a preset.</p>
+    <p class="sketch__hint">
+      <span class="visually-hidden">The canvas shows Fourier epicycles redrawing the selected shape.</span>
+      Draw a closed shape on the canvas, or pick a preset.
+    </p>
 
     <div class="sketch__controls">
       <div class="sketch__group" role="group" aria-label="Shape">
