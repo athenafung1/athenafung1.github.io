@@ -1,0 +1,133 @@
+---
+// Shell for one note (/notes/<id>/): date, title, tags and reading time, then the Markdown body in a
+// readable column, with links back to all notes.
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from './BaseLayout.astro';
+import { formatNoteDate, isoDate, readingMinutes } from '../lib/notes.ts';
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+}
+
+const { note } = Astro.props;
+const { title, description, date, tags } = note.data;
+const minutes = readingMinutes(note.body ?? '');
+---
+
+<BaseLayout title={`${title} · Athena Fung`} description={description}>
+  <article class="note">
+    <a class="back label" href="/notes/"><span aria-hidden="true">←</span> All notes</a>
+
+    <header class="note__head">
+      <p class="label note__meta">
+        <time datetime={isoDate(date)}>{formatNoteDate(date)}</time>
+        <span>{minutes} min read</span>
+      </p>
+      <h1 class="note__title">{title}</h1>
+      {
+        tags.length > 0 && (
+          <ul class="note__tags" role="list" aria-label="Tags">
+            {tags.map((tag) => (
+              <li>{tag}</li>
+            ))}
+          </ul>
+        )
+      }
+    </header>
+
+    <div class="note__body prose">
+      <slot />
+    </div>
+
+    <a class="back label" href="/notes/"><span aria-hidden="true">←</span> All notes</a>
+  </article>
+</BaseLayout>
+
+<style>
+  .note {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-l);
+  }
+
+  .back {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    min-height: var(--tap);
+    width: fit-content;
+    text-decoration: none;
+    color: var(--color-muted);
+  }
+
+  .note__head {
+    display: grid;
+    gap: var(--space-s);
+    max-width: var(--measure);
+    padding-block-end: var(--space-l);
+    border-block-end: 1px solid var(--color-rule);
+  }
+
+  .note__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+  }
+
+  .note__title {
+    font-size: var(--step-5);
+    view-transition-name: page-title;
+  }
+
+  .note__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) 0.3em;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--step--1);
+    font-weight: 500;
+    color: var(--color-muted);
+  }
+
+  /* A comma after each tag but the last, as in the project tech lists. */
+  .note__tags li:not(:last-child)::after {
+    content: ',';
+  }
+
+  /* Rendered Markdown: space above each section heading does the separating; code blocks scroll,
+     never the page. */
+  .note__body :global(h2) {
+    margin-block-start: var(--space-xl);
+    font-size: var(--step-3);
+  }
+
+  .note__body :global(h2:first-child) {
+    margin-block-start: 0;
+  }
+
+  .note__body :global(pre) {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: var(--space-s);
+    border-radius: var(--radius-m);
+    background: var(--color-surface);
+    border: 1px solid var(--color-rule);
+    font-size: var(--step--1);
+    line-height: 1.5;
+  }
+
+  .note__body :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+
+  .note__body :global(.astro-code),
+  .note__body :global(.astro-code span) {
+    color: light-dark(var(--shiki-light), var(--shiki-dark));
+  }
+
+  .note__body :global(img) {
+    border-radius: var(--radius-m);
+  }
+</style>
