@@ -135,4 +135,17 @@ const interests = defineCollection({
     }),
 });
 
-export const collections = { profile, nav, projects, interests };
+// One Markdown file per note: a short write-up, listed newest first at /notes/ and on the landing
+// page, and published at /notes/<id>/. `description` is the page's meta description and the
+// one-line summary in lists.
+const notes = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/notes' }),
+  schema: z.strictObject({
+    title: z.string().min(1).max(80),
+    description: z.string().min(50).max(160),
+    date: z.coerce.date(),
+    tags: z.array(z.string().min(1).max(24)).max(5).default([]),
+  }),
+});
+
+export const collections = { profile, nav, projects, interests, notes };

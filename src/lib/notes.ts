@@ -1,0 +1,25 @@
+// Notes: short write-ups (src/content/notes/<slug>.md), listed at /notes/ and on the landing page.
+// Pure, framework-free, erasable TypeScript.
+import { countWords } from './content-rules.ts';
+
+type Dated = { id: string; data: { date: Date } };
+
+/** Newest first; notes from the same day by slug, so the order never depends on file order. */
+export function sortNotes<T extends Dated>(notes: readonly T[]): T[] {
+  return [...notes].sort((a, b) => b.data.date.getTime() - a.data.date.getTime() || a.id.localeCompare(b.id));
+}
+
+/** Minutes to read at 220 words a minute, at least one. Code blocks don't count. */
+export function readingMinutes(markdown: string): number {
+  return Math.max(1, Math.round(countWords(markdown) / 220));
+}
+
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+/** "12 Oct 2026". Dates are read as written (UTC), so a note dated the 12th shows the 12th everywhere. */
+export function formatNoteDate(date: Date): string {
+  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+}
+
+/** "2026-10-12", for the <time datetime> attribute. */
+export const isoDate = (date: Date) => date.toISOString().slice(0, 10);

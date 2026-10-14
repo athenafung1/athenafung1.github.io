@@ -2,4 +2,5 @@
 - { id: home, label: Home, href: /, order: 1 }
 - { id: projects, label: Projects, href: /projects/, order: 3 }
 - { id: about, label: About, href: /about/, order: 2 }
-- { id: fun, label: Fun, href: /fun/, order: 4 }
+- { id: notes, label: Notes, href: /notes/, order: 4 }
+- { id: fun, label: Fun, href: /fun/, order: 5 }

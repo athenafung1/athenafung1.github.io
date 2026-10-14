@@ -1,0 +1,20 @@
+---
+// One page per note, at /notes/<id>/ (the file name without .md).
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import NoteLayout from '../../layouts/NoteLayout.astro';
+
+export async function getStaticPaths() {
+  return (await getCollection('notes')).map((note) => ({ params: { slug: note.id }, props: { note } }));
+}
+
+interface Props {
+  note: CollectionEntry<'notes'>;
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+---
+
+<NoteLayout note={note}>
+  <Content />
+</NoteLayout>

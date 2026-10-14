@@ -3,7 +3,9 @@ import { getCollection, getEntry } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactLinks from '../components/ContactLinks.astro';
 import HeroCurve from '../components/HeroCurve.astro';
+import NoteList from '../components/NoteList.astro';
 import ProjectCard from '../components/ProjectCard.astro';
+import { sortNotes } from '../lib/notes.ts';
 import { selectFeatured } from '../lib/projects.ts';
 
 const author = await getEntry('profile', 'author');
@@ -11,6 +13,8 @@ if (!author) throw new Error('src/data/profile.yaml must define `author`.');
 const { name, role, strengths, contact } = author.data;
 // Up to three featured projects; the build fails if none is featured (FR-007).
 const featured = selectFeatured(await getCollection('projects'), 3);
+// The three most recent notes; the section is left out until there is one.
+const notes = sortNotes(await getCollection('notes')).slice(0, 3);
 ---
 
 <BaseLayout
@@ -39,6 +43,22 @@ const featured = selectFeatured(await getCollection('projects'), 3);
       <HeroCurve />
     </div>
   </section>
+
+  {
+    notes.length > 0 && (
+      <section class="recent section" aria-labelledby="recent-title">
+        <div class="section-head">
+          <h2 id="recent-title">Recent notes</h2>
+        </div>
+        <NoteList notes={notes} headingLevel={3} compact />
+        <p class="recent__more">
+          <a class="button button--secondary" href="/notes/">
+            All notes
+          </a>
+        </p>
+      </section>
+    )
+  }
 
   <section class="selected section" aria-labelledby="selected-title">
     <div class="section-head selected__head">
@@ -117,8 +137,13 @@ const featured = selectFeatured(await getCollection('projects'), 3);
     margin-block-start: var(--space-2xs);
   }
 
+  .recent,
   .selected {
     margin-block-start: var(--space-2xl);
+  }
+
+  .recent__more {
+    margin-block-start: var(--space-l);
   }
 
   .selected__list {
