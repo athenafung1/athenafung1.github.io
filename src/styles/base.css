@@ -228,9 +228,11 @@
   }
 }
 
-/* Cross-document view transitions (research R17): CSS only, progressive enhancement. The site mark
-   and each page's title carry view-transition-names so they morph between pages. Browsers without
-   support, and visitors who prefer reduced motion, get normal navigation. */
+/* Cross-document view transitions (research R17): CSS only, progressive enhancement. Pages
+   cross-fade; the site mark carries a view-transition-name, so it holds still while the rest fades.
+   Page titles deliberately have no name: morphing between headings of different sizes looked
+   clunky. Browsers without support, and visitors who prefer reduced motion, get normal
+   navigation. */
 @media (prefers-reduced-motion: no-preference) {
   @view-transition {
     navigation: auto;
