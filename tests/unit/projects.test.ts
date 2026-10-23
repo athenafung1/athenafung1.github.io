@@ -28,8 +28,8 @@ describe('selectFeatured', () => {
     expect(selectFeatured(list)).toHaveLength(3);
   });
 
-  it('throws when no project is featured', () => {
-    expect(() => selectFeatured([p('a', false, 1)])).toThrow(/featured/);
+  it('is empty when no project is featured', () => {
+    expect(selectFeatured([p('a', false, 1)])).toEqual([]);
   });
 });
 

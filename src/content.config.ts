@@ -49,14 +49,17 @@ const profile = defineCollection({
   schema: z.strictObject({
     name: z.string().min(1).max(80),
     role: z.string().min(1).max(120),
-    strengths: z.array(z.string().min(1).max(60)).min(2).max(4),
+    // Optional (FR-006): 2 to 4 when given.
+    strengths: z.array(z.string().min(1).max(60)).min(2).max(4).optional(),
     bio: z.string().min(1).max(1200),
     location: z.string().max(80).optional(),
     seeking: z.string().max(300).optional(),
     education: z.array(education).min(1),
     experience: z.array(experience).min(1),
-    skills: z.array(skillGroup).min(1),
-    resume: z.string().regex(/^\/.+\.pdf$/, 'resume must be a root-relative path ending in .pdf'),
+    // Optional (FR-013).
+    skills: z.array(skillGroup).optional(),
+    // Optional: without it, the About page shows no resume download.
+    resume: z.string().regex(/^\/.+\.pdf$/, 'resume must be a root-relative path ending in .pdf').optional(),
     contact: z.strictObject({
       email: z.email(),
       github: hostIs('github.com'),
@@ -90,7 +93,8 @@ const projects = defineCollection({
             const sentences = countSentences(text);
             return sentences >= 1 && sentences <= 3;
           }, 'summary must be 1 to 3 sentences (FR-009)'),
-        tech: z.array(z.string().min(1).max(30)).min(1, 'list at least one technology (FR-009)'),
+        // Optional: a project without a tech list shows none.
+        tech: z.array(z.string().min(1).max(30)).default([]),
         links: z
           .array(
             z.strictObject({
@@ -137,13 +141,13 @@ const interests = defineCollection({
 
 // One Markdown file per musing: a short write-up, listed newest first at /musings/ and on the landing
 // page, and published at /musings/<id>/. `description` is the page's meta description and the
-// one-line summary in lists.
+// one-line summary in lists. `date` is optional; undated musings are listed after the dated ones.
 const musings = defineCollection({
   loader: glob({ pattern: '*.md', base: './src/content/musings' }),
   schema: z.strictObject({
     title: z.string().min(1).max(80),
     description: z.string().min(50).max(160),
-    date: z.coerce.date(),
+    date: z.coerce.date().optional(),
     tags: z.array(z.string().min(1).max(24)).max(5).default([]),
   }),
 });

@@ -9,13 +9,11 @@ export function sortProjects<T extends Orderable>(list: readonly T[]): T[] {
   );
 }
 
-/** Featured projects for the landing page, in display order. The landing page needs at least one. */
+/** Featured projects for the landing page, in display order; empty when none is featured (FR-007). */
 export function selectFeatured<T extends Orderable>(list: readonly T[], limit = 3): T[] {
-  const featured = sortProjects(list).filter((entry) => entry.data.featured);
-  if (featured.length === 0) {
-    throw new Error('No featured project: set `featured: true` on at least one file in src/content/projects/.');
-  }
-  return featured.slice(0, limit);
+  return sortProjects(list)
+    .filter((entry) => entry.data.featured)
+    .slice(0, limit);
 }
 
 /** Two entries in the same featured group may not share an `order` (keeps ordering deterministic). */

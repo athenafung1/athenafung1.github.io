@@ -1,12 +1,17 @@
 import { describe, expect, it } from 'vitest';
 import { formatMusingDate, isoDate, readingMinutes, sortMusings } from '../../src/lib/musings.ts';
 
-const musing = (id: string, date: string) => ({ id, data: { date: new Date(date) } });
+const musing = (id: string, date?: string) => ({ id, data: { date: date ? new Date(date) : undefined } });
 
 describe('sortMusings', () => {
   it('puts the newest first and breaks same-day ties by slug', () => {
     const sorted = sortMusings([musing('b', '2026-10-01'), musing('c', '2026-10-12'), musing('a', '2026-10-12')]);
     expect(sorted.map((n) => n.id)).toEqual(['a', 'c', 'b']);
+  });
+
+  it('lists undated musings after the dated ones, by slug', () => {
+    const sorted = sortMusings([musing('z'), musing('old', '2025-01-01'), musing('y'), musing('new', '2026-01-01')]);
+    expect(sorted.map((n) => n.id)).toEqual(['new', 'old', 'y', 'z']);
   });
 
   it('leaves the original list alone', () => {

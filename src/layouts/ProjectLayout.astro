@@ -22,9 +22,13 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
       <ProjectEmblem seed={project.id} class="case-study__emblem" />
       {period && <p class="label">{period}</p>}
       <h1 class="case-study__title">{title}</h1>
-      <ul class="case-study__tech" role="list" aria-label="Technologies">
-        {tech.map((item) => <li>{item}</li>)}
-      </ul>
+      {
+        tech.length > 0 && (
+          <ul class="case-study__tech" role="list" aria-label="Technologies">
+            {tech.map((item) => <li>{item}</li>)}
+          </ul>
+        )
+      }
       <ul class="case-study__links" role="list">
         {
           links.map((link) => (

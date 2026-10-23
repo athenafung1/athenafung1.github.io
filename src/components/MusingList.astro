@@ -13,15 +13,19 @@ interface Props {
 
 const { musings, headingLevel = 2, compact = false } = Astro.props;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
+// The date column only appears when at least one musing has a date.
+const dated = musings.some((musing) => musing.data.date);
 ---
 
-<ol class:list={['musings', { 'musings--compact': compact }]} role="list">
+<ol class:list={['musings', { 'musings--compact': compact, 'musings--dated': dated }]} role="list">
   {
     musings.map((musing) => (
       <li class="musing-item">
-        <time class="label musing-item__date" datetime={isoDate(musing.data.date)}>
-          {formatMusingDate(musing.data.date)}
-        </time>
+        {musing.data.date && (
+          <time class="label musing-item__date" datetime={isoDate(musing.data.date)}>
+            {formatMusingDate(musing.data.date)}
+          </time>
+        )}
         <div class="musing-item__body">
           <Heading class="musing-item__title">
             <a href={`/musings/${musing.id}/`}>{musing.data.title}</a>
@@ -97,14 +101,19 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
     }
   }
 
-  /* Wide screens: the date in its own column, like the About timeline used to be. */
+  /* Wide screens: the date in its own column, like the About timeline used to be, when any musing in
+     the list has one. Undated musings then leave the column empty rather than shifting into it. */
   @media (min-width: 48rem) {
-    .musing-item {
+    .musings--dated .musing-item {
       grid-template-columns: 9rem minmax(0, 1fr);
     }
 
     .musing-item__date {
       padding-block-start: 0.4em;
+    }
+
+    .musings--dated .musing-item__body {
+      grid-column: 2;
     }
   }
 </style>

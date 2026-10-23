@@ -2,11 +2,12 @@
 // Pure, framework-free, erasable TypeScript.
 import { countWords } from './content-rules.ts';
 
-type Dated = { id: string; data: { date: Date } };
+type Dated = { id: string; data: { date?: Date } };
 
-/** Newest first; musings from the same day by slug, so the order never depends on file order. */
+/** Newest first, then the undated ones; ties by slug, so the order never depends on file order. */
 export function sortMusings<T extends Dated>(musings: readonly T[]): T[] {
-  return [...musings].sort((a, b) => b.data.date.getTime() - a.data.date.getTime() || a.id.localeCompare(b.id));
+  const time = (musing: Dated) => musing.data.date?.getTime() ?? -Infinity;
+  return [...musings].sort((a, b) => time(b) - time(a) || a.id.localeCompare(b.id));
 }
 
 /** Minutes to read at 220 words a minute, at least one. Code blocks don't count. */

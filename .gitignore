@@ -28,6 +28,10 @@ dist/
 src/content/projects/test/
 src/content/musings/test/
 
+# Stand-in resume: the resume is optional (FR-014). To publish a real one, remove this line, add
+# the PDF and set `resume` in src/data/profile.yaml.
+public/resume.pdf
+
 # Python bytecode
 __pycache__/
 *.pyc

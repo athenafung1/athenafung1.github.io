@@ -32,9 +32,13 @@ const typeLabel = { repository: 'Repository', demo: 'Live demo', writeup: 'Write
       {detailHref ? <a href={detailHref}>{title}</a> : title}
     </Heading>
     <p class="project-card__summary">{summary}</p>
-    <ul class="project-card__tech" role="list" aria-label="Technologies">
-      {tech.map((item) => <li>{item}</li>)}
-    </ul>
+    {
+      tech.length > 0 && (
+        <ul class="project-card__tech" role="list" aria-label="Technologies">
+          {tech.map((item) => <li>{item}</li>)}
+        </ul>
+      )
+    }
     <ul class="project-card__links" role="list">
       {
         detailHref && (
