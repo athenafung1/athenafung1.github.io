@@ -309,7 +309,7 @@ async function lineDrawing(input) {
   }
   if (!kept.length) return { points: [], lifts: [] };
 
-  // One tour: the longest stroke first, then always the nearest stroke end.
+  // One tour: the best-scoring stroke first, then always the nearest stroke end.
   const left = kept.slice(1);
   const tour = [kept[0]];
   let end = kept[0][kept[0].length - 1];

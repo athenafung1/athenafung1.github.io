@@ -23,3 +23,7 @@ dist/
 .lighthouseci/
 *.log
 .env*
+
+# Python bytecode
+__pycache__/
+*.pyc
