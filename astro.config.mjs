@@ -31,9 +31,19 @@ const mathml = {
   },
 };
 
+// HTML comments in Markdown (a commented-out figure, a note to self) are dropped at build time, so
+// they stay in the source but never reach the published page.
+const stripComments = {
+  name: 'strip-comments',
+  /** @param {{ value: string }} node @param {any} ctx */
+  html(node, ctx) {
+    if (/^\s*<!--[\s\S]*-->\s*$/.test(node.value)) ctx.removeNode(node);
+  },
+};
+
 // Static build for GitHub Pages (user site, served from the domain root).
-// Output goes to Astro's default `dist/`, which pages.yml uploads. The hand-written
-// `site/` folder is a frozen, unpublished record (constitution v1.3.0) and is not touched.
+// Output goes to Astro's default `dist/`, which pages.yml uploads. The previous site, in `site/`, is
+// a frozen, unpublished record (constitution) and is not touched.
 export default defineConfig({
   site: 'https://athenafung1.github.io',
   output: 'static',
@@ -43,7 +53,7 @@ export default defineConfig({
   },
   integrations: [svelte()],
   markdown: {
-    processor: satteri({ features: { math: true }, mdastPlugins: [mathml] }),
+    processor: satteri({ features: { math: true }, mdastPlugins: [mathml, stripComments] }),
     // Dual themes as CSS variables; ProjectLayout picks one with light-dark() so code blocks follow
     // the site theme (including the manual toggle).
     shikiConfig: {
