@@ -31,17 +31,17 @@ const photos = await loadPhotos();
   description="What Athena Fung makes and does off the clock, plus a few mathematical toys to play with in the browser."
 >
   <header class="fun-head">
-    <h1 class="fun-head__title">Off the clock</h1>
-    <p class="fun-head__intro">
-      Things I make and do when nobody is grading them, and a few mathematical toys to poke at.
-    </p>
+    <h1 class="fun-head__title">Fun</h1>
+    {/* <p class="fun-head__intro">
+      Let's adventure.
+    </p> */}
   </header>
 
-  <PieceFrame id={fourier.id} name={fourier.name} idea={fourier.idea}>
+  {/* <PieceFrame id={fourier.id} name={fourier.name} idea={fourier.idea}>
     <FourierSketch client:visible>
       <FourierFallback />
     </FourierSketch>
-  </PieceFrame>
+  </PieceFrame> */}
 
   {
     photos.length > 0 && (
@@ -54,7 +54,7 @@ const photos = await loadPhotos();
     )
   }
 
-  <section class="section interests" aria-labelledby="interests-title">
+  {/* <section class="section interests" aria-labelledby="interests-title">
     <div class="section-head">
       <h2 id="interests-title">Interests &amp; endeavours</h2>
     </div>
@@ -67,7 +67,7 @@ const photos = await loadPhotos();
         ))
       }
     </ul>
-  </section>
+  </section> */}
 </BaseLayout>
 
 <style>

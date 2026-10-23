@@ -11,7 +11,7 @@ import { selectFeatured } from '../lib/projects.ts';
 const author = await getEntry('profile', 'author');
 if (!author) throw new Error('src/data/profile.yaml must define `author`.');
 const { name, role, strengths, contact } = author.data;
-// Up to three featured projects; the build fails if none is featured (FR-007).
+// Up to three featured projects; optional (FR-007), so the list may be empty.
 const featured = selectFeatured(await getCollection('projects'), 3);
 // The three most recent musings; the section is left out until there is one.
 const musings = sortMusings(await getCollection('musings')).slice(0, 3);
@@ -26,16 +26,16 @@ const musings = sortMusings(await getCollection('musings')).slice(0, 3);
       <h1 id="hero-title" class="hero__name">{name}</h1>
       <p class="hero__role">{role}</p>
 
-      <!-- <ul class="hero__strengths" role="list" aria-label="Strengths">
+      {/* <ul class="hero__strengths" role="list" aria-label="Strengths">
         {strengths.map((strength) => <li>{strength}</li>)}
-      </ul> -->
+      </ul> */}
 
       <div class="hero__actions">
-        <a class="button button--primary" href="/projects/">
+        {/* <a class="button button--primary" href="/projects/">
           View projects
-        </a>
-        <!-- <a class="button button--secondary" href={`mailto:${contact.email}`}>Email me</a>
-        <ContactLinks omit={['email']} /> -->
+        </a> */}
+        {/* <a class="button button--secondary" href={`mailto:${contact.email}`}>Email me</a>
+        <ContactLinks omit={['email']} /> */}
       </div>
     </div>
 
@@ -45,22 +45,22 @@ const musings = sortMusings(await getCollection('musings')).slice(0, 3);
   </section>
 
   {
-    musings.length > 0 && (
-      <section class="recent section" aria-labelledby="recent-title">
-        <div class="section-head">
-          <h2 id="recent-title">Recent musings</h2>
-        </div>
-        <MusingList musings={musings} headingLevel={3} compact />
-        <p class="recent__more">
-          <a class="button button--secondary" href="/musings/">
-            All musings
-          </a>
-        </p>
-      </section>
-    )
+    // musings.length > 0 && (
+    //   <section class="recent section" aria-labelledby="recent-title">
+    //     <div class="section-head">
+    //       <h2 id="recent-title">Recent musings</h2>
+    //     </div>
+    //     <MusingList musings={musings} headingLevel={3} compact />
+    //     <p class="recent__more">
+    //       <a class="button button--secondary" href="/musings/">
+    //         All musings
+    //       </a>
+    //     </p>
+    //   </section>
+    // )
   }
 
-  <section class="selected section" aria-labelledby="selected-title">
+  {/* <section class="selected section" aria-labelledby="selected-title">
     <div class="section-head selected__head">
       <h2 id="selected-title">Things I’ve built</h2>
     </div>
@@ -78,7 +78,7 @@ const musings = sortMusings(await getCollection('musings')).slice(0, 3);
         View all projects
       </a>
     </p>
-  </section>
+  </section> */}
 </BaseLayout>
 
 <style>

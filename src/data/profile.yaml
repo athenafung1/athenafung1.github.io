@@ -3,15 +3,14 @@
 # deploying. Replace them with real content.
 author:
   name: Athena Fung
-  role: "DRAFT: one-line statement of what you do, e.g. software engineer building ..."
+  role: "A human building things in a world of robots"
   strengths:
     - "DRAFT: strength one"
     - "DRAFT: strength two"
   seeking: "DRAFT: what you're looking for (internships, full-time roles, collaborations)"
   bio: |
-    DRAFT: a short first paragraph about who you are and what you work on.
-
-    DRAFT: a second paragraph about what drives you, outside the resume.
+    I'm continuously in awe of and inspired by the revolutionary change that society and technology have been making across all fields of study, 
+    and am always exploring new avenues for learning, building, and developing solutions for the present, future, and beyond.
   education:
     - institution: University of Illinois Urbana-Champaign
       credential: "Master of Computer Science"
@@ -41,7 +40,10 @@ author:
       items: ["DRAFT: language"]
     - group: Tools
       items: ["DRAFT: tool"]
-  resume: /resume.pdf
+  # Optional resume. To offer one: save the PDF as public/resume.pdf (no phone number or street
+  # address), delete the `public/resume.pdf` line in .gitignore, then uncomment the next line. The
+  # About page then shows a download button.
+  # resume: /resume.pdf
   contact:
     email: athenafung1@gmail.com
     github: https://github.com/athenafung1
