@@ -1,24 +1,24 @@
 import { describe, expect, it } from 'vitest';
-import { formatNoteDate, isoDate, readingMinutes, sortNotes } from '../../src/lib/notes.ts';
+import { formatMusingDate, isoDate, readingMinutes, sortMusings } from '../../src/lib/musings.ts';
 
-const note = (id: string, date: string) => ({ id, data: { date: new Date(date) } });
+const musing = (id: string, date: string) => ({ id, data: { date: new Date(date) } });
 
-describe('sortNotes', () => {
+describe('sortMusings', () => {
   it('puts the newest first and breaks same-day ties by slug', () => {
-    const sorted = sortNotes([note('b', '2026-10-01'), note('c', '2026-10-12'), note('a', '2026-10-12')]);
+    const sorted = sortMusings([musing('b', '2026-10-01'), musing('c', '2026-10-12'), musing('a', '2026-10-12')]);
     expect(sorted.map((n) => n.id)).toEqual(['a', 'c', 'b']);
   });
 
   it('leaves the original list alone', () => {
-    const list = [note('old', '2025-01-01'), note('new', '2026-01-01')];
-    sortNotes(list);
+    const list = [musing('old', '2025-01-01'), musing('new', '2026-01-01')];
+    sortMusings(list);
     expect(list[0].id).toBe('old');
   });
 });
 
 describe('readingMinutes', () => {
   it('is at least one minute', () => {
-    expect(readingMinutes('A short note.')).toBe(1);
+    expect(readingMinutes('A short musing.')).toBe(1);
   });
 
   it('counts prose at 220 words a minute and skips code blocks', () => {
@@ -30,8 +30,8 @@ describe('readingMinutes', () => {
 
 describe('dates', () => {
   it('shows the day as written, whatever the time zone', () => {
-    expect(formatNoteDate(new Date('2026-10-12'))).toBe('12 Oct 2026');
-    expect(formatNoteDate(new Date('2026-01-01'))).toBe('1 Jan 2026');
+    expect(formatMusingDate(new Date('2026-10-12'))).toBe('12 Oct 2026');
+    expect(formatMusingDate(new Date('2026-01-01'))).toBe('1 Jan 2026');
     expect(isoDate(new Date('2026-10-12'))).toBe('2026-10-12');
   });
 });

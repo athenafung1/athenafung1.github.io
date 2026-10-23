@@ -1,0 +1,20 @@
+---
+// One page per musing, at /musings/<id>/ (the file name without .md).
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import MusingLayout from '../../layouts/MusingLayout.astro';
+
+export async function getStaticPaths() {
+  return (await getCollection('musings')).map((musing) => ({ params: { slug: musing.id }, props: { musing } }));
+}
+
+interface Props {
+  musing: CollectionEntry<'musings'>;
+}
+
+const { musing } = Astro.props;
+const { Content } = await render(musing);
+---
+
+<MusingLayout musing={musing}>
+  <Content />
+</MusingLayout>

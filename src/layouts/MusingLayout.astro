@@ -1,32 +1,32 @@
 ---
-// Shell for one note (/notes/<id>/): date, title, tags and reading time, then the Markdown body in a
-// readable column, with links back to all notes.
+// Shell for one musing (/musings/<id>/): date, title, tags and reading time, then the Markdown body in a
+// readable column, with links back to all musings.
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from './BaseLayout.astro';
-import { formatNoteDate, isoDate, readingMinutes } from '../lib/notes.ts';
+import { formatMusingDate, isoDate, readingMinutes } from '../lib/musings.ts';
 
 interface Props {
-  note: CollectionEntry<'notes'>;
+  musing: CollectionEntry<'musings'>;
 }
 
-const { note } = Astro.props;
-const { title, description, date, tags } = note.data;
-const minutes = readingMinutes(note.body ?? '');
+const { musing } = Astro.props;
+const { title, description, date, tags } = musing.data;
+const minutes = readingMinutes(musing.body ?? '');
 ---
 
 <BaseLayout title={`${title} · Athena Fung`} description={description}>
-  <article class="note">
-    <a class="back label" href="/notes/"><span aria-hidden="true">←</span> All notes</a>
+  <article class="musing">
+    <a class="back label" href="/musings/"><span aria-hidden="true">←</span> All musings</a>
 
-    <header class="note__head">
-      <p class="label note__meta">
-        <time datetime={isoDate(date)}>{formatNoteDate(date)}</time>
+    <header class="musing__head">
+      <p class="label musing__meta">
+        <time datetime={isoDate(date)}>{formatMusingDate(date)}</time>
         <span>{minutes} min read</span>
       </p>
-      <h1 class="note__title">{title}</h1>
+      <h1 class="musing__title">{title}</h1>
       {
         tags.length > 0 && (
-          <ul class="note__tags" role="list" aria-label="Tags">
+          <ul class="musing__tags" role="list" aria-label="Tags">
             {tags.map((tag) => (
               <li>{tag}</li>
             ))}
@@ -35,16 +35,16 @@ const minutes = readingMinutes(note.body ?? '');
       }
     </header>
 
-    <div class="note__body prose">
+    <div class="musing__body prose">
       <slot />
     </div>
 
-    <a class="back label" href="/notes/"><span aria-hidden="true">←</span> All notes</a>
+    <a class="back label" href="/musings/"><span aria-hidden="true">←</span> All musings</a>
   </article>
 </BaseLayout>
 
 <style>
-  .note {
+  .musing {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-l);
@@ -60,7 +60,7 @@ const minutes = readingMinutes(note.body ?? '');
     color: var(--color-muted);
   }
 
-  .note__head {
+  .musing__head {
     display: grid;
     gap: var(--space-s);
     max-width: var(--measure);
@@ -68,18 +68,18 @@ const minutes = readingMinutes(note.body ?? '');
     border-block-end: 1px solid var(--color-rule);
   }
 
-  .note__meta {
+  .musing__meta {
     display: flex;
     flex-wrap: wrap;
     gap: 0 var(--space-s);
   }
 
-  .note__title {
+  .musing__title {
     font-size: var(--step-5);
     view-transition-name: page-title;
   }
 
-  .note__tags {
+  .musing__tags {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3xs) 0.3em;
@@ -92,22 +92,22 @@ const minutes = readingMinutes(note.body ?? '');
   }
 
   /* A comma after each tag but the last, as in the project tech lists. */
-  .note__tags li:not(:last-child)::after {
+  .musing__tags li:not(:last-child)::after {
     content: ',';
   }
 
   /* Rendered Markdown: space above each section heading does the separating; code blocks scroll,
      never the page. */
-  .note__body :global(h2) {
+  .musing__body :global(h2) {
     margin-block-start: var(--space-xl);
     font-size: var(--step-3);
   }
 
-  .note__body :global(h2:first-child) {
+  .musing__body :global(h2:first-child) {
     margin-block-start: 0;
   }
 
-  .note__body :global(pre) {
+  .musing__body :global(pre) {
     max-width: 100%;
     overflow-x: auto;
     padding: var(--space-s);
@@ -118,16 +118,16 @@ const minutes = readingMinutes(note.body ?? '');
     line-height: 1.5;
   }
 
-  .note__body :global(code) {
+  .musing__body :global(code) {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   }
 
-  .note__body :global(.astro-code),
-  .note__body :global(.astro-code span) {
+  .musing__body :global(.astro-code),
+  .musing__body :global(.astro-code span) {
     color: light-dark(var(--shiki-light), var(--shiki-dark));
   }
 
-  .note__body :global(img) {
+  .musing__body :global(img) {
     border-radius: var(--radius-m);
   }
 </style>

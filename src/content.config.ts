@@ -135,11 +135,11 @@ const interests = defineCollection({
     }),
 });
 
-// One Markdown file per note: a short write-up, listed newest first at /notes/ and on the landing
-// page, and published at /notes/<id>/. `description` is the page's meta description and the
+// One Markdown file per musing: a short write-up, listed newest first at /musings/ and on the landing
+// page, and published at /musings/<id>/. `description` is the page's meta description and the
 // one-line summary in lists.
-const notes = defineCollection({
-  loader: glob({ pattern: '*.md', base: './src/content/notes' }),
+const musings = defineCollection({
+  loader: glob({ pattern: '*.md', base: './src/content/musings' }),
   schema: z.strictObject({
     title: z.string().min(1).max(80),
     description: z.string().min(50).max(160),
@@ -148,4 +148,4 @@ const notes = defineCollection({
   }),
 });
 
-export const collections = { profile, nav, projects, interests, notes };
+export const collections = { profile, nav, projects, interests, musings };
