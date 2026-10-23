@@ -1,0 +1,61 @@
+---
+// Build-time static fallback for the Fourier Sketch (FR-017): the "AF" preset redrawn by its
+// 64 largest Fourier terms, with the first epicycles faintly drawn at t = 0. Shown before the
+// island mounts and permanently when JavaScript is off.
+import { normalizeToViewBox, toSvgPath } from '../lib/curves.ts';
+import { dft, epicycleChain, reconstruct, resample, sortByAmplitude } from '../lib/fourier.ts';
+import { PRESETS } from '../lib/presets.ts';
+
+const width = 640;
+const height = 400;
+const preset = PRESETS[0];
+const samples = resample(normalizeToViewBox(preset.points, width, height, 70), 256).map((p) => ({
+  x: p.x - width / 2,
+  y: p.y - height / 2,
+}));
+const coefficients = sortByAmplitude(dft(samples));
+const terms = 64;
+const trace = Array.from({ length: 400 }, (_, i) => reconstruct(coefficients, terms, i / 400));
+const tracePath = toSvgPath(trace.map((p) => ({ x: p.x + width / 2, y: p.y + height / 2 })), { closed: true });
+const circles = epicycleChain(coefficients, 12, 0).filter((c) => c.radius > 1.5);
+const round = (n: number) => Math.round(n * 10) / 10;
+---
+
+<svg class="fourier-fallback" viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="fourier-fallback-title fourier-fallback-desc">
+  <title id="fourier-fallback-title">Fourier Sketch: the letters AF redrawn by spinning circles</title>
+  <desc id="fourier-fallback-desc">
+    A static drawing of the initials AF traced by the sum of its {terms} largest Fourier terms, with the
+    first few rotating circles shown faintly.
+  </desc>
+  <g class="fourier-fallback__circles">
+    {
+      circles.map((c) => (
+        <circle cx={round(c.center.x + width / 2)} cy={round(c.center.y + height / 2)} r={round(c.radius)} />
+      ))
+    }
+  </g>
+  <path class="fourier-fallback__trace" d={tracePath}></path>
+</svg>
+
+<style>
+  .fourier-fallback {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 8 / 5;
+  }
+
+  .fourier-fallback__circles circle {
+    fill: none;
+    stroke: var(--color-border);
+    stroke-width: 0.8;
+    opacity: 0.6;
+  }
+
+  .fourier-fallback__trace {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 2.2;
+    stroke-linejoin: round;
+  }
+</style>

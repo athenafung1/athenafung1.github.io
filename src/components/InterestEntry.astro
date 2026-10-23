@@ -1,0 +1,117 @@
+---
+// One interest or endeavour on the Fun page. Media: on-site images + plain outbound links only
+// (FR-035): never <iframe>, <video> or <audio>.
+import { render, type CollectionEntry } from 'astro:content';
+import Picture from './Picture.astro';
+
+interface Props {
+  entry: CollectionEntry<'interests'>;
+  /** Fun page: h1 → "Interests" h2 → entries h3 (Principle III: no skipped levels). */
+  headingLevel?: 2 | 3 | 4;
+}
+
+const { entry, headingLevel = 3 } = Astro.props;
+const { title, category, images = [], links = [] } = entry.data;
+const { Content } = await render(entry);
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
+const verb = { video: 'Watch', audio: 'Listen', writing: 'Read', other: 'Visit' } as const;
+---
+
+<article class="interest">
+  <div class="interest__text">
+    {category && <p class="label">{category}</p>}
+    <Heading class="interest__title">{title}</Heading>
+    <div class="interest__body prose">
+      <Content />
+    </div>
+    {
+      links.length > 0 && (
+        <ul class="interest__links" role="list">
+          {links.map((link) => (
+            <li>
+              <a href={link.url} rel="noopener">
+                <span class="label">{verb[link.type]}</span>
+                <span>{link.label}</span>
+                <span aria-hidden="true">↗</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+  {
+    images.length > 0 && (
+      <ul class:list={['interest__gallery', `interest__gallery--${Math.min(images.length, 3)}`]} role="list">
+        {images.map((image) => (
+          <li>
+            <Picture src={image.src} alt={image.alt} decorative={image.decorative} sizes="(min-width: 56rem) 33vw, 100vw" />
+          </li>
+        ))}
+      </ul>
+    )
+  }
+</article>
+
+<style>
+  .interest {
+    display: grid;
+    gap: var(--space-m);
+    padding-block: var(--space-m);
+    border-block-start: 1px solid var(--color-rule);
+    container-type: inline-size;
+  }
+
+  .interest__text {
+    display: grid;
+    gap: var(--space-2xs);
+    align-content: start;
+  }
+
+  .interest__title {
+    font-size: var(--step-2);
+  }
+
+  .interest__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-m);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .interest__links a {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4em;
+    min-height: var(--tap);
+    padding-block: 0.6em;
+    font-weight: 600;
+  }
+
+  .interest__gallery {
+    display: grid;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .interest__gallery :global(img) {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius-m);
+  }
+
+  @container (min-width: 36rem) {
+    .interest__gallery--2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .interest__gallery--3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

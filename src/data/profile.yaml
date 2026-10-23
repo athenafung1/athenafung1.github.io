@@ -1,0 +1,50 @@
+# Author profile. Schema: src/content.config.ts (strict: no phone or street address, FR-036).
+# Every value starting with "DRAFT:" is a stand-in that scripts/check-content.mjs blocks from
+# deploying. Replace them with real content.
+author:
+  name: Athena Fung
+  role: "A human building things in a world of robots"
+  strengths:
+    - "DRAFT: strength one"
+    - "DRAFT: strength two"
+  seeking: "DRAFT: what you're looking for (internships, full-time roles, collaborations)"
+  bio: |
+    I'm continuously in awe of and inspired by the revolutionary change that society and technology have been making across all fields of study, 
+    and am always exploring new avenues for learning, building, and developing solutions for the present, future, and beyond.
+  education:
+    - institution: University of Illinois Urbana-Champaign
+      credential: "Master of Computer Science"
+      period: "Jan 2024 - Dec 2024"
+    - institution: University of Illinois Urbana-Champaign
+      credential: "B.S. Computer Science"
+      period: "Aug 2020 - Dec 2023"
+  experience:
+    - organization: "NVIDIA"
+      title: "Systems Performance Engineer"
+      period: "2025 - Present"
+      summary: "Architecting next generation AI/HPC clusters."
+    - organization: "NVIDIA"
+      title: "Systems Performance Engineer Intern, Applied Systems Engineering at Scale"
+      period: "Summer 2024"
+      summary: "[Next-Gen Architecture team] Analyzed InfiniBand and NVLink performance variations in production clusters. Researched anomaly detection algorithms and deployed admin dashboards integrating Splunk MLTK to visualize networking performance."
+    - organization: "Google"
+      title: "Software Engineer Intern, Google Cloud Platform/Technical Infrastructure"
+      period: "Summer 2023"
+      summary: "[Network Topology Modeling team] Developed backend infrastructure service to validate Google's B2 network model updates to adaptably and scalably integrate complex client-requested logical network invariants and mitigate restrictive development cycle dependencies."
+    - organization: "Uber"
+      title: "Software Engineer Intern, Platform Engineering"
+      period: "Summer 2022"
+      summary: "[Core Infrastructure Foundations team] Developed infrastructure to verify baseboard management controller (BMC) hardware health prior to host remediation."
+  skills:
+    - group: Languages
+      items: ["DRAFT: language"]
+    - group: Tools
+      items: ["DRAFT: tool"]
+  # Optional resume. To offer one: save the PDF as public/resume.pdf (no phone number or street
+  # address), delete the `public/resume.pdf` line in .gitignore, then uncomment the next line. The
+  # About page then shows a download button.
+  # resume: /resume.pdf
+  contact:
+    email: athenafung1@gmail.com
+    github: https://github.com/athenafung1
+    linkedin: https://www.linkedin.com/in/athenafung1

@@ -1,0 +1,57 @@
+[
+  {
+    "id": "carmel-landscape",
+    "title": "Carmel landscape",
+    "alt": "The rocky Carmel coastline under a band of low cloud, with dark rocks scattered through a deep blue sea."
+  },
+  {
+    "id": "carmel-ocean-left",
+    "title": "Carmel ocean, left",
+    "alt": "A sandy trail dropping toward the rocky Carmel shore, with two gulls overhead and low cloud on the horizon."
+  },
+  {
+    "id": "carmel-ocean-right",
+    "title": "Carmel ocean, right",
+    "alt": "A scrubby hillside falling to a rocky cove on the Carmel coast, under a clear blue sky."
+  },
+  {
+    "id": "cloud-forest",
+    "title": "Cloud forest",
+    "alt": "Sunlight bursting through palm and tropical leaves beneath a glass roof."
+  },
+  {
+    "id": "eclectus-parrot",
+    "title": "Eclectus parrot",
+    "alt": "A bright green eclectus parrot with an orange beak, perched among trees."
+  },
+  {
+    "id": "funny-trees",
+    "title": "Funny trees",
+    "alt": "The tops of five palm trees poking up along the bottom edge of a wide, clear blue sky."
+  },
+  {
+    "id": "palms",
+    "title": "Palms",
+    "alt": "Tall, thin palm trees against a blue sky, rising above the roof of a low building."
+  },
+  {
+    "id": "plant-portrait",
+    "title": "Plant portrait",
+    "alt": "A small jade plant in a magenta pot on a wooden table."
+  },
+  {
+    "id": "sausalito",
+    "title": "Sausalito",
+    "alt": "The Sausalito waterfront, with a restaurant on a pier over the bay and houses climbing the hillside behind."
+  },
+  {
+    "id": "snow-landscape",
+    "title": "Snow landscape",
+    "alt": "A trodden trail through snow between pine trees, with the sun breaking over the treetops."
+  },
+  {
+    "id": "surf",
+    "title": "Surf",
+    "alt": "Surfers waiting for waves in turquoise water, seen over the tops of palm trees."
+  }
+]

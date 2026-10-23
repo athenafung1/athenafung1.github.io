@@ -1,0 +1,40 @@
+---
+// All musings, newest first.
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MusingList from '../../components/MusingList.astro';
+import { sortMusings } from '../../lib/musings.ts';
+
+const musings = sortMusings(await getCollection('musings'));
+---
+
+<BaseLayout
+  title="Musings · Athena Fung"
+  description="Notes teaching something or write-ups about things Athena Fung is exploring."
+>
+  <header class="page-head">
+    <h1 class="page-head__title">Musings</h1>
+    {/* <p class="page-head__intro">Musings to dive into something new.</p> */}
+  </header>
+
+  {musings.length > 0 ? <MusingList musings={musings} /> : <p class="page-head__intro">No musings yet.</p>}
+</BaseLayout>
+
+<style>
+  .page-head {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+    margin-block-end: var(--space-xl);
+  }
+
+  .page-head__title {
+    font-size: var(--step-5);
+    view-transition-name: page-title;
+  }
+
+  .page-head__intro {
+    font-size: var(--step-1);
+    color: var(--color-muted);
+  }
+</style>

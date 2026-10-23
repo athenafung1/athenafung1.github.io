@@ -1,0 +1,119 @@
+---
+// A list of musings, newest first: date, title (linking to the musing) and its one-line description.
+// Used on /musings/ (with tags and reading time) and on the landing page (`compact`).
+import type { CollectionEntry } from 'astro:content';
+import { formatMusingDate, isoDate, readingMinutes } from '../lib/musings.ts';
+
+interface Props {
+  musings: CollectionEntry<'musings'>[];
+  /** h2 on /musings/, h3 under the landing page's section heading. */
+  headingLevel?: 2 | 3;
+  compact?: boolean;
+}
+
+const { musings, headingLevel = 2, compact = false } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3';
+// The date column only appears when at least one musing has a date.
+const dated = musings.some((musing) => musing.data.date);
+---
+
+<ol class:list={['musings', { 'musings--compact': compact, 'musings--dated': dated }]} role="list">
+  {
+    musings.map((musing) => (
+      <li class="musing-item">
+        {musing.data.date && (
+          <time class="label musing-item__date" datetime={isoDate(musing.data.date)}>
+            {formatMusingDate(musing.data.date)}
+          </time>
+        )}
+        <div class="musing-item__body">
+          <Heading class="musing-item__title">
+            <a href={`/musings/${musing.id}/`}>{musing.data.title}</a>
+          </Heading>
+          <p class="musing-item__description">{musing.data.description}</p>
+          {!compact && (
+            <p class="label musing-item__meta">
+              <span>{readingMinutes(musing.body ?? '')} min read</span>
+              {musing.data.tags.length > 0 && <span>{musing.data.tags.join(', ')}</span>}
+            </p>
+          )}
+        </div>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .musings {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-block-end: 1px solid var(--color-rule);
+  }
+
+  /* The whole row opens the musing; the title link stretches over it. */
+  .musing-item {
+    position: relative;
+    display: grid;
+    gap: var(--space-3xs) var(--space-l);
+    padding-block: var(--space-m);
+    border-block-start: 1px solid var(--color-rule);
+  }
+
+  .musing-item__body {
+    display: grid;
+    gap: var(--space-2xs);
+    max-width: var(--measure);
+  }
+
+  .musing-item__title {
+    font-size: var(--step-2);
+  }
+
+  .musings--compact .musing-item__title {
+    font-size: var(--step-1);
+  }
+
+  .musing-item__title a {
+    text-decoration: none;
+  }
+
+  .musing-item__title a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .musing-item__description {
+    color: var(--color-muted);
+  }
+
+  .musing-item__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-s);
+  }
+
+  @media (hover: hover) {
+    .musing-item:hover .musing-item__title a {
+      color: var(--color-accent);
+    }
+  }
+
+  /* Wide screens: the date in its own column, like the About timeline used to be, when any musing in
+     the list has one. Undated musings then leave the column empty rather than shifting into it. */
+  @media (min-width: 48rem) {
+    .musings--dated .musing-item {
+      grid-template-columns: 9rem minmax(0, 1fr);
+    }
+
+    .musing-item__date {
+      padding-block-start: 0.4em;
+    }
+
+    .musings--dated .musing-item__body {
+      grid-column: 2;
+    }
+  }
+</style>

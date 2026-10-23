@@ -1,0 +1,173 @@
+---
+import { existsSync, statSync } from 'node:fs';
+import { getEntry } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactLinks from '../components/ContactLinks.astro';
+import AboutTimeline from '../islands/about/AboutTimeline.svelte';
+import { buildEntries, toYears } from '../lib/timeline.ts';
+
+const author = await getEntry('profile', 'author');
+if (!author) throw new Error('src/data/profile.yaml must define `author`.');
+const { name, bio, seeking, location, skills, resume, contact } = author.data;
+// Education and experience as one dated timeline; ongoing roles end on the day of the build.
+const timeline = buildEntries(author.data, toYears(new Date()));
+
+// The resume is optional (FR-014). When the profile names one, the file must exist; its size is
+// shown next to the link.
+let resumeSize: string | undefined;
+if (resume) {
+  const resumeFile = `public${resume}`;
+  if (!existsSync(resumeFile)) {
+    throw new Error(`${resumeFile} is missing: add the public resume PDF (no phone number or street address, FR-036).`);
+  }
+  resumeSize = `${Math.max(1, Math.round(statSync(resumeFile).size / 1024))} KB`;
+}
+
+// Plain-text bio: paragraphs separated by blank lines (no Markdown dependency).
+const paragraphs = bio
+  .split(/\n\s*\n/)
+  .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
+  .filter(Boolean);
+---
+
+<BaseLayout
+  ogImage="/og/about.png"
+  title={`About · ${name}`}
+  description={`About ${name}: background, education, experience and skills.`}
+>
+  <header class="about-head">
+    <h1 class="about-head__title">Hi there, I’m {name.split(' ')[0]}!</h1>
+    {location && <p class="label">Based in {location}</p>}
+  </header>
+
+  <div class="about">
+    <section class="about__bio prose" aria-label="Biography">
+      {paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+      {/* {seeking && <p class="about__seeking"><span class="label">Looking for</span> {seeking}</p>} */}
+      {
+        resume && (
+          <p>
+            <a class="button button--primary" href={resume} download>
+              Download resume <span class="label resume-meta">PDF, {resumeSize}</span>
+            </a>
+          </p>
+        )
+      }
+    </section>
+
+    {/* Newest first, the current role leading; the drawing beside it is the site's harmonograph,
+         one circle per entry, built up as the list scrolls from the first entry to now. */}
+    <section class="section" aria-labelledby="timeline-title">
+      {/* Read by screen readers but not shown: names the section and keeps the heading levels in order
+           (h1, then this h2, then each entry's h3). */}
+      <h2 id="timeline-title" class="visually-hidden">Work and education</h2>
+      <AboutTimeline client:visible entries={timeline} />
+    </section>
+
+    {/* <section class="section" aria-labelledby="skills-title">
+      <div class="section-head">
+        <h2 id="skills-title">Skills</h2>
+      </div>
+      <dl class="skills">
+        {
+          skills.map((group) => (
+            <div class="skills__group">
+              <dt class="label">{group.group}</dt>
+              <dd>
+                <ul class="skills__items" role="list">
+                  {group.items.map((item) => (
+                    <li>{item}</li>
+                  ))}
+                </ul>
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </section> */}
+
+    {/* <section class="section contact-call" aria-labelledby="contact-title">
+      <div class="section-head">
+        <h2 id="contact-title">Get in touch</h2>
+      </div>
+      <p class="contact-call__text">
+        The fastest way to reach me is email: <a href={`mailto:${contact.email}`}>{contact.email}</a>. I’m also on
+        GitHub and LinkedIn.
+      </p>
+      <ContactLinks variant="compact" />
+    </section> */}
+  </div>
+</BaseLayout>
+
+<style>
+  .about-head {
+    display: grid;
+    gap: var(--space-2xs);
+    margin-block-end: var(--space-xl);
+  }
+
+  /* The greeting stays on one line: on phones the size follows the screen width (the text is about
+     8.7em wide, so 9.5vw leaves room inside the gutters). */
+  .about-head__title {
+    font-size: min(var(--step-5), 9.5vw);
+    view-transition-name: page-title;
+  }
+
+  .about__seeking .label {
+    display: block;
+  }
+
+  .resume-meta {
+    color: inherit;
+    opacity: 0.75;
+  }
+
+  .about {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about > .section {
+    margin-block-start: var(--space-2xl);
+  }
+
+  .skills {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: var(--space-l);
+    margin: 0;
+  }
+
+  .skills__group {
+    display: grid;
+    gap: var(--space-2xs);
+    padding-block-start: var(--space-2xs);
+    border-block-start: 1px solid var(--color-rule);
+  }
+
+  .skills dd {
+    margin: 0;
+  }
+
+  .skills__items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .skills__items li {
+    padding: 0.2em 0.7em;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    font-size: var(--step--1);
+  }
+
+  .contact-call__text {
+    max-width: var(--measure);
+    margin-block-end: var(--space-s);
+    font-size: var(--step-1);
+  }
+</style>

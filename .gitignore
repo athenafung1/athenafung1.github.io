@@ -1,0 +1,37 @@
+# Dependencies
+node_modules/
+
+# Build output
+_site/
+.jekyll-cache/
+build/
+dist/
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
+
+# Local environment
+.env
+.env.local
+
+# Astro / tooling
+.astro/
+.lighthouseci/
+*.log
+.env*
+
+# Local scratch content
+src/content/projects/test/
+src/content/musings/test/
+
+# Stand-in resume: the resume is optional (FR-014). To publish a real one, remove this line, add
+# the PDF and set `resume` in src/data/profile.yaml.
+public/resume.pdf
+
+# Python bytecode
+__pycache__/
+*.pyc

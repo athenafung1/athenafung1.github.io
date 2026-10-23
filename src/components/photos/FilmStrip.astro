@@ -1,0 +1,251 @@
+---
+// The Fun page's photography: one reel of film that scrolls sideways and snaps frame to frame, with
+// sprocket holes along both edges and each frame's number and title printed on the film below it
+// (plus the date and camera settings when SHOW_DATE / SHOW_CAMERA are on in photos.ts). Previous
+// and Next step a frame at a time; the reel itself scrolls with swipes, a trackpad or the arrow keys,
+// and clicking a frame opens it full screen.
+//
+// Frames not yet drawn are blank paper marked with the site's rose; the frame the reel settles on is
+// drawn by the harmonograph and then develops into the photo (plate-drawing.ts). Each frame is drawn
+// the first time it is reached and stays developed; Redraw replays it. Without JavaScript, or with
+// reduced motion, the frames are simply the photos. Every photo in src/data/photos.json joins the
+// reel in that order (adding one: see scripts/prepare-photos.mjs), and each fetches its drawing only
+// when it is reached.
+import DrawnPlate from './DrawnPlate.astro';
+import PhotoLightbox from './PhotoLightbox.astro';
+import { cameraParts, takenLabel, type Photo } from './photos.ts';
+
+interface Props {
+  photos: Photo[];
+}
+
+const { photos } = Astro.props;
+const sizes = '(min-width: 64rem) 46rem, 90vw';
+---
+
+<div class="strip" data-strip>
+  <div class="strip__reel" tabindex="0" role="region" aria-label="Film strip, scroll sideways" data-reel>
+    <ol class="strip__frames" role="list">
+      {
+        photos.map((photo, index) => (
+          <li class="cell" data-cell style={`--ratio: ${photo.width / photo.height}`}>
+            <DrawnPlate photo={photo} index={index} sizes={sizes} />
+            <p class="cell__edge">
+              <span class="cell__no">{String(index + 1).padStart(2, '0')}</span>
+              <span class="cell__title">{photo.title}</span>
+              {takenLabel(photo.taken) && <span>{takenLabel(photo.taken)}</span>}
+              {cameraParts(photo.camera).map((part) => (
+                <span class="cell__setting">{part}</span>
+              ))}
+            </p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  <div class="strip__controls" data-controls hidden>
+    <button type="button" class="strip__button" data-step="-1">Previous</button>
+    <span class="strip__count" data-count></span>
+    <button type="button" class="strip__button" data-step="1">Next</button>
+    <button type="button" class="strip__button" data-redraw hidden>Redraw</button>
+  </div>
+</div>
+<PhotoLightbox photos={photos} />
+
+<script>
+  import { PlateDrawing, prefersStill } from './plate-drawing.ts';
+
+  const strip = document.querySelector<HTMLElement>('[data-strip]');
+  const reel = strip?.querySelector<HTMLElement>('[data-reel]');
+  if (strip && reel) {
+    const cells = [...strip.querySelectorAll<HTMLElement>('[data-cell]')];
+    const count = strip.querySelector('[data-count]')!;
+    const controls = strip.querySelector<HTMLElement>('[data-controls]')!;
+    const smooth = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    let current = 0;
+    controls.hidden = false;
+
+    // The current frame is the one nearest the middle of the reel.
+    const update = () => {
+      const middle = reel.scrollLeft + reel.clientWidth / 2;
+      let best = 0;
+      let bestD = Infinity;
+      cells.forEach((cell, i) => {
+        const d = Math.abs(cell.offsetLeft + cell.offsetWidth / 2 - middle);
+        if (d < bestD) [best, bestD] = [i, d];
+      });
+      current = best;
+      count.textContent = `${current + 1} of ${cells.length}`;
+    };
+    let queued = 0;
+    reel.addEventListener('scroll', () => {
+      if (!queued) queued = requestAnimationFrame(() => ((queued = 0), update()));
+    }, { passive: true });
+
+    const goTo = (i: number) => {
+      const cell = cells[Math.max(0, Math.min(cells.length - 1, i))];
+      reel.scrollTo({ left: cell.offsetLeft + cell.offsetWidth / 2 - reel.clientWidth / 2, behavior: smooth });
+    };
+    for (const button of strip.querySelectorAll<HTMLButtonElement>('[data-step]')) {
+      button.addEventListener('click', () => goTo(current + Number(button.dataset.step)));
+    }
+    reel.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowRight' || event.key === 'ArrowLeft') {
+        event.preventDefault();
+        goTo(current + (event.key === 'ArrowRight' ? 1 : -1));
+      }
+    });
+    // Start with the first frame in the middle, where snapping would put it.
+    const first = cells[0];
+    reel.scrollLeft = first.offsetLeft + first.offsetWidth / 2 - reel.clientWidth / 2;
+    update();
+
+    // Once the reel settles (and is on screen), the current frame is drawn if it hasn't been yet, and
+    // its neighbours fetch their drawings so they are ready.
+    if (!prefersStill()) {
+      const redraw = strip.querySelector<HTMLButtonElement>('[data-redraw]')!;
+      let drawings: (PlateDrawing | null)[] = [];
+      const showRedraw = () => (redraw.hidden = drawings[current]?.state !== 'developed');
+      drawings = cells.map((cell) => {
+        const figure = cell.querySelector<HTMLElement>('[data-plate]');
+        return figure ? new PlateDrawing(figure, { drawMs: 5500, onChange: showRedraw }) : null;
+      });
+      let inView = false;
+      const settle = () => {
+        showRedraw();
+        if (!inView) return;
+        if (drawings[current]?.state === 'waiting') drawings[current]!.begin();
+        drawings[current - 1]?.load();
+        drawings[current + 1]?.load();
+      };
+      let timer = 0;
+      reel.addEventListener(
+        'scroll',
+        () => {
+          clearTimeout(timer);
+          timer = window.setTimeout(settle, 160);
+        },
+        { passive: true },
+      );
+      new IntersectionObserver(
+        ([entry]) => {
+          inView = entry.isIntersecting;
+          settle();
+        },
+        { threshold: 0.5 },
+      ).observe(reel);
+      redraw.addEventListener('click', () => drawings[current]?.begin());
+    }
+  }
+</script>
+
+<style>
+  .strip {
+    --film: light-dark(#1b201d, #0e1210);
+    --edge: #b7c48c;
+    /* Frame height: from the screen's height, but on narrow screens from its width, so a landscape
+       frame fits across and portrait frames don't make the reel much taller than it. */
+    --frame-h: clamp(12rem, min(52svh, 58vw), 30rem);
+    display: grid;
+    gap: var(--space-s);
+  }
+
+  /* Sprocket holes along both edges of the reel, drawn with gradients. */
+  .strip__reel {
+    --hole: radial-gradient(ellipse at 50% 50%, var(--color-bg) 0 48%, transparent 52%);
+    container-type: inline-size;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: thin;
+    padding-block: 1.5rem;
+    border-radius: var(--radius-s);
+    background-color: var(--film);
+    background-image: var(--hole), var(--hole);
+    background-size: 1.4rem 0.7rem;
+    background-position:
+      left 0 top 0.4rem,
+      left 0 bottom 0.4rem;
+    background-repeat: repeat-x;
+    background-attachment: local;
+  }
+
+  .strip__reel:focus-visible {
+    outline-offset: 3px;
+  }
+
+  .strip__frames {
+    display: flex;
+    align-items: flex-start; /* each frame keeps its own height, caption right under it */
+    gap: var(--space-s);
+    width: max-content;
+    margin: 0;
+    /* Room at both ends so the first and last frames can snap to the middle. */
+    padding: 0 max(var(--space-m), calc(50cqw - 18rem));
+    list-style: none;
+  }
+
+  .cell {
+    display: grid;
+    gap: var(--space-2xs);
+    width: calc(var(--frame-h) * var(--ratio));
+    max-width: 88vw;
+    scroll-snap-align: center;
+  }
+
+  /* Square corners, like frames on film. */
+  .cell :global(.plate) {
+    border-radius: 0;
+  }
+
+  /* Printed on the film below the frame. */
+  .cell__edge {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--space-xs);
+    color: var(--edge);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cell__no,
+  .cell__title {
+    font-weight: 600;
+  }
+
+  .cell__setting {
+    opacity: 0.75;
+  }
+
+  .strip__controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-s);
+  }
+
+  .strip__button {
+    min-height: var(--tap);
+    padding-inline: var(--space-s);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: transparent;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .strip__count {
+    min-width: 5ch;
+    text-align: center;
+    color: var(--color-muted);
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (hover: hover) {
+    .strip__button:hover {
+      border-color: var(--color-accent);
+      color: var(--color-accent);
+    }
+  }
+</style>

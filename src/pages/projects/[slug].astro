@@ -1,0 +1,39 @@
+---
+// Project detail pages: one per project with `detail: true` (FR-033).
+import { existsSync } from 'node:fs';
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import ProjectLayout from '../../layouts/ProjectLayout.astro';
+import { hasDetailSections, hasVisualOrCode } from '../../lib/content-rules.ts';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  for (const project of projects) {
+    const file = `src/content/projects/${project.id}.md`;
+    const body = project.body ?? '';
+    if (project.data.detail) {
+      if (!hasDetailSections(body)) {
+        throw new Error(`${file}: detail pages need "## Problem", "## Approach" and "## Outcome" headings, in that order (FR-033).`);
+      }
+      if (!hasVisualOrCode(body)) {
+        throw new Error(`${file}: detail pages need at least one image or fenced code block (FR-033).`);
+      }
+    } else if (body.trim()) {
+      console.warn(`[projects] ${file} has body text but detail is false, so the body is not published.`);
+    }
+  }
+  return projects.filter((project) => project.data.detail).map((project) => ({ params: { slug: project.id }, props: { project } }));
+}
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const ogCandidate = `/og/projects/${project.id}.png`;
+const ogImage = existsSync(`public${ogCandidate}`) ? ogCandidate : undefined;
+---
+
+<ProjectLayout project={project} ogImage={ogImage}>
+  <Content />
+</ProjectLayout>
