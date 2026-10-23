@@ -5,9 +5,10 @@
       "url": [
         "http://localhost/",
         "http://localhost/projects/",
-        "http://localhost/projects/smart-legos/",
         "http://localhost/about/",
-        "http://localhost/fun/"
+        "http://localhost/fun/",
+        "http://localhost/musings/",
+        "http://localhost/musings/drawing-photos-with-circles/"
       ],
       "numberOfRuns": 3
     },
