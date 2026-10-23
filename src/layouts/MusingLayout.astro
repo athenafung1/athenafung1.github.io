@@ -20,7 +20,7 @@ const minutes = readingMinutes(musing.body ?? '');
 
     <header class="musing__head">
       <p class="label musing__meta">
-        <time datetime={isoDate(date)}>{formatMusingDate(date)}</time>
+        {date && <time datetime={isoDate(date)}>{formatMusingDate(date)}</time>}
         <span>{minutes} min read</span>
       </p>
       <h1 class="musing__title">{title}</h1>
@@ -129,5 +129,164 @@ const minutes = readingMinutes(musing.body ?? '');
 
   .musing__body :global(img) {
     border-radius: var(--radius-m);
+  }
+
+  .musing__body :global(h3) {
+    margin-block-start: var(--space-l);
+  }
+
+  /* Display equations (MathML, rendered at build time) scroll sideways on narrow screens, never the
+     page. */
+  .musing__body :global(.math-display) {
+    display: block;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: var(--space-3xs);
+  }
+
+  .musing__body :global(math) {
+    font-size: 1.08em;
+  }
+
+  /* Chrome ignores MathML's columnalign and columnspacing, which KaTeX's aligned (right left, no
+     gap) and cases (left) layouts rely on; restate them in CSS. */
+  .musing__body :global(mtable[columnalign^='right left'] > mtr > mtd:nth-child(odd)) {
+    text-align: right;
+  }
+
+  .musing__body :global(mtable[columnalign^='right left'] > mtr > mtd:nth-child(even)),
+  .musing__body :global(mtable[columnalign^='left'] > mtr > mtd) {
+    text-align: left;
+  }
+
+  .musing__body :global(mtable[columnspacing='0em'] > mtr > mtd) {
+    padding-inline: 0;
+  }
+
+  /* Side notes (the site's .margin-note) hold proofs and remarks. A proof with display equations is
+     written as an <aside> between paragraphs rather than a span inside one. Maths needs a wider
+     note than the project pages' 15rem; 19rem still fits beside the text from 72rem up. */
+  .musing__body :global(.margin-note > * + *) {
+    margin-block-start: var(--space-2xs);
+  }
+
+  .musing__body :global(.margin-note .math-display) {
+    padding-block: 0;
+  }
+
+  @media (min-width: 72rem) {
+    .musing__body :global(.margin-note) {
+      --note-width: 19rem;
+    }
+  }
+
+  .musing__body :global(table) {
+    border-collapse: collapse;
+    font-size: var(--step--1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .musing__body :global(th),
+  .musing__body :global(td) {
+    padding: var(--space-3xs) var(--space-s) var(--space-3xs) 0;
+    border-block-end: 1px solid var(--color-rule);
+    text-align: end;
+  }
+
+  .musing__body :global(th:first-child),
+  .musing__body :global(td:first-child) {
+    text-align: start;
+  }
+
+  /* Figures: inline SVG drawn in the theme's colours. Panels sit side by side where they fit, each at
+     least --panel wide. */
+  .musing__body :global(.fig) {
+    display: grid;
+    gap: var(--space-xs);
+    margin-block: var(--space-l);
+  }
+
+  .musing__body :global(.fig__panels) {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--panel, 10rem)), 1fr));
+    gap: var(--space-s);
+  }
+
+  .musing__body :global(.fig__panel) {
+    display: grid;
+    gap: var(--space-3xs);
+    align-content: start;
+  }
+
+  .musing__body :global(.fig svg),
+  .musing__body :global(.fig img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  /* A figure with words in it keeps its drawn size, so the words stay readable; it only shrinks. */
+  .musing__body :global(.fig svg[width]) {
+    width: auto;
+    max-width: 100%;
+  }
+
+  .musing__body :global(.fig figcaption),
+  .musing__body :global(.fig__label) {
+    font-size: var(--step--1);
+    color: var(--color-muted);
+  }
+
+  .musing__body :global(.fig path),
+  .musing__body :global(.fig circle) {
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .musing__body :global(.fig .ink) {
+    stroke: var(--color-accent);
+    stroke-width: 1.75;
+  }
+
+  .musing__body :global(.fig .thin) {
+    stroke-width: 1;
+  }
+
+  .musing__body :global(.fig .faint) {
+    stroke: var(--color-border);
+    stroke-opacity: 0.5;
+    stroke-width: 1.5;
+  }
+
+  .musing__body :global(.fig .guide) {
+    stroke: var(--color-muted);
+    stroke-opacity: 0.45;
+    stroke-width: 1;
+  }
+
+  .musing__body :global(.fig .arm) {
+    stroke: var(--color-text);
+    stroke-opacity: 0.75;
+    stroke-width: 1;
+  }
+
+  .musing__body :global(.fig .dash) {
+    stroke: var(--color-muted);
+    stroke-width: 1;
+    stroke-dasharray: 3 4;
+  }
+
+  .musing__body :global(.fig .dot) {
+    fill: var(--color-text);
+    stroke: none;
+  }
+
+  .musing__body :global(.fig .label) {
+    fill: var(--color-muted);
+    font-size: 15px;
+    font-style: italic;
   }
 </style>
