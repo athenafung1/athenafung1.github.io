@@ -31,8 +31,9 @@ npm run preview        # serves dist/ over HTTP at http://localhost:4321
 ```
 
 **Expected**: `npm run build` exits 0 and `dist/` contains `index.html`, `about/index.html`,
-`projects/index.html`, `fun/index.html`, one `projects/<slug>/index.html` per `detail: true`
-project, `404.html`, `resume.pdf`, and the two legacy stubs. Always validate against
+`projects/index.html`, `musings/index.html`, `fun/index.html`, one `projects/<slug>/index.html` per
+`detail: true` project, one `musings/<slug>/index.html` per musing, `404.html`, the two legacy
+stubs while they remain, and `resume.pdf` only if a resume is offered. Always validate against
 `npm run preview`, never by opening files as `file://` (constitution pre-deploy check).
 
 **Content validation**: introduce each of these errors in turn and confirm the build fails with a
@@ -63,14 +64,15 @@ On `npm run preview`, in DevTools device mode **and** on a real phone:
 | Check | 320px | 768px | 1280px (×720 for Landing) |
 |---|---|---|---|
 | No horizontal scroll on any page (`document.documentElement.scrollWidth === innerWidth`) | ✓ | ✓ | ✓ |
-| Header: site mark + all four nav links + theme toggle visible, no hamburger | ✓ | ✓ | ✓ |
-| Landing: name, role line, 2–4 strengths, primary action and email/GitHub/LinkedIn links visible without scrolling | — | — | ✓ at 1280×720 (FR-006, US1) |
+| Header: site mark + all nav links + theme toggle visible, no hamburger | ✓ | ✓ | ✓ |
+| Landing: name and role line visible without scrolling, plus strengths and a primary action when shown | — | — | ✓ at 1280×720 (FR-006, US1) |
 | Tap targets ≥ 44×44 px (nav, contact icons, piece controls) | ✓ | ✓ | — |
 | Long project title and skill list wrap without overlap | ✓ | ✓ | ✓ |
 
-Repeat the table in **both** light and dark appearances. On the phone, also confirm that the page
-scrolls normally when a swipe starts on the Fourier Sketch frame outside its drawing surface, and
-that drawing on the surface does not scroll the page.
+Repeat the table in **both** light and dark appearances. On the phone, also confirm that the film
+strip scrolls sideways under a swipe while the page still scrolls vertically, and, while the
+Fourier Sketch is shown on the Fun page, that a swipe starting on its frame outside the drawing
+surface scrolls the page and drawing on the surface does not.
 
 ## 5. Behavior scenarios
 
@@ -81,29 +83,37 @@ that drawing on the surface does not scroll the page.
 | 5.3 | Private window | Repeat 5.2 in a private window with storage blocked | Toggle works per page view, with no console errors | FR-034 edge case |
 | 5.4 | Reduced motion | OS → reduce motion, reload `/` and `/fun/`, then navigate between pages | Hero curve static and complete. Piece starts paused with a Step control. No page transition animation. Easter egg shows a static card | FR-026, FR-019 |
 | 5.5 | Keyboard only | Tab through every page | Skip link first. Visible focus on every control. Fourier Sketch fully usable (presets, slider, play/pause, reset) | FR-024, FR-017 |
-| 5.6 | Fourier Sketch | Draw a shape on a phone, then change the term slider | Epicycles redraw the shape. More terms gives a visibly closer match and fewer terms a smoother, rougher outline. Scrolling it off screen pauses it (CPU drops in DevTools Performance) | US4, R12 |
+| 5.6 | Fourier Sketch (while shown on the Fun page) | Draw a shape on a phone, then change the term slider | Epicycles redraw the shape. More terms gives a visibly closer match and fewer terms a smoother, rougher outline. Scrolling it off screen pauses it (CPU drops in DevTools Performance) | US4, R12 |
 | 5.7 | Easter egg | Trigger by keyboard sequence, then by touch trigger on a phone | Plays ≤ 6 s or closes with Esc or tap. Content never covered, shifted or blocked. Network panel shows the egg chunk fetched only on trigger | FR-019 |
-| 5.8 | Legacy URLs | Visit `/about/about_index.html` and `/projects/projects_index.html` | Lands on `/about/` and `/projects/` | SC-010, FR-005 |
+| 5.8 | (Removed) | Old addresses are no longer redirected | — | FR-005 and SC-010 removed |
 | 5.9 | Unknown URL | Visit `/nope/` on the deployed site | 404 page with navigation. Home reachable in one click | Edge case |
 | 5.10 | Project detail | From `/projects/`, open a card with a detail page | Problem / Approach / Outcome plus a visual. Back link to `/projects/`. Projects marked current in nav | FR-033 |
 | 5.11 | Sharing preview | Paste each page URL into a link-preview debugger (after deploy) | Correct title, description, image | FR-028 |
 | 5.12 | One-click reach | From each page, reach every other top-level page and each contact link | One click or tap each | SC-003 |
-| 5.13 | Frame rate | On a mid-range phone with remote DevTools, record 5 s of the Fourier Sketch playing at the maximum term count (Performance panel) | Holds about 60 fps with no long tasks over 50 ms; drops are acceptable only while the slider moves | Plan performance goals |
+| 5.13 | Frame rate | On a mid-range phone with remote DevTools, record 5 s of the Fourier Sketch (while shown) playing at the maximum term count (Performance panel) | Holds about 60 fps with no long tasks over 50 ms; drops are acceptable only while the slider moves | Plan performance goals |
+| 5.14 | Film strip | Open `/fun/`, then use Previous, Next, the arrow keys and Redraw | The current frame is drawn by its circles and then develops into the photo. Frames not yet drawn show blank paper with the rose, never the photo first. Redraw replays. With JavaScript off or reduced motion, every frame is the plain photo | FR-016, FR-017, FR-026 |
+| 5.15 | Musings | Open `/musings/`, then a musing, with JavaScript on and then off | Dated musings newest first, then undated. Each page shows its title, description, reading time, and its date and tags when it has them. Equations are readable with JavaScript off. Side notes sit in the margin from 1152px and inline below that | FR-037–039 |
 
 ## 6. Pre-deploy content checks (manual)
 
-- [ ] `public/resume.pdf` opened and read: **no phone number, no street address** (FR-036)
-- [ ] Resume and About page agree on education and experience (FR-014)
+- [ ] If a resume is offered (`resume` set in `src/data/profile.yaml`): `public/resume.pdf` opened
+      and read, **no phone number, no street address** (FR-036), and it agrees with the About page
+      on education and experience (FR-014)
 - [ ] No placeholder text anywhere (also enforced by `check-content.mjs`)
 - [ ] Every image's alt text describes it, not "image of…"
 - [ ] Console is clean on every page (SC-009)
+- [ ] Before the first merge to `master`: in the repository's Settings → Pages → Build and
+      deployment, **Source** is **GitHub Actions**, not "Deploy from a branch". `pages.yml`
+      publishes `dist/` only through Actions. While the source is still the branch, GitHub Pages
+      keeps serving the root of `master`, which after the merge has no `index.html`, so the live
+      site would break.
 
 ## 7. Post-deploy verification (constitution)
 
 After merge to `master` and the `Deploy to GitHub Pages` run completes:
 
 1. Open `https://athenafung1.github.io/` plus every route in [contracts/routes.md](./contracts/routes.md).
-2. Repeat 5.8, 5.9 and 5.11 against the live URL.
+2. Repeat 5.9 and 5.11 against the live URL.
 3. Run Lighthouse against the live URL for `/` and `/fun/` and confirm the SC-004/SC-005
    thresholds hold in production.
 4. In the repository's Settings → Pages, confirm **Enforce HTTPS** is enabled, and that

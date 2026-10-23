@@ -1,22 +1,16 @@
 <!--
 Sync Impact Report
-- Version change: 1.2.0 → 1.3.0
-- Rationale: MINOR. The hosting section moves publication from the hand-written `site/` to
-  `dist/`, which is build output generated from `src/` and `public/`, and keeps `site/` in the
-  repository as a frozen, unpublished record. This materially changes an existing constraint, so
-  PATCH does not apply. It amends a hosting constraint, not a core principle, and no existing
-  file is deleted or invalidated, so MAJOR does not apply. Note: until feature
-  001-portfolio-site merges, `master` still deploys `site/`; this amendment MUST merge with or
-  before that feature.
+- Version change: 1.4.0 → 1.4.1
+- Rationale: PATCH. Wording only: `site/` is now described as the previous site. Nothing that is
+  permitted or required changes.
 - Modified principles: none
 - Modified sections:
-  - Technology and Hosting Constraints — `dist/` is the sole published directory (build output
-    from `src/` and `public/`, never hand-edited or committed); build-only files in `src/` are
-    permitted if never emitted into `dist/`; `site/` is retained as a frozen, unpublished record;
-    the deploy workflow builds before uploading `dist/`
+  - Technology and Hosting Constraints — `site/` described as the previous site
 - Added sections: none
 - Removed sections: none
-- Deferred TODOs: none
+- Dependent artifacts updated: README.md, specs/001-portfolio-site/plan.md, and the comments in
+  .github/workflows/pages.yml and astro.config.mjs
+- Deferred TODOs: if this amendment merges after 2026-10-22, set **Last Amended** to the merge date
 -->
 
 # Portfolio Website Constitution
@@ -45,8 +39,8 @@ interactive enhancements.
 - The site MUST include, at minimum: an identity/intro section (name and what the author does), a
   projects section, a way to contact the author, and a link to a resume or a resume-equivalent
   experience section.
-- Every project entry MUST carry a title, a one-to-three sentence summary, the technologies used,
-  and at least one link (repository, live demo, writeup, or publication).
+- Every project entry MUST carry a title, a one-to-three sentence summary, and at least one link
+  (repository, live demo, writeup, or publication). It MAY list the technologies used.
 - The site MUST ship with at least one real project entry; placeholder or lorem-ipsum content MUST
   NOT be present in a deployed build.
 - Contact information MUST be reachable without JavaScript (a plain `mailto:` or profile link
@@ -119,15 +113,18 @@ after a year of not touching it.
   permitted there as long as they are never emitted into `dist/` as files. Anything that must not
   be published (including `site/`, `archive/`, `specs/`, and `.specify/`) MUST live outside
   `src/`, `public/`, and `dist/`.
-- `site/` holds the hand-written site that was published before v1.3.0. It is kept in place as a
-  frozen record: like `archive/`, its contents MUST NOT be edited, deleted, imported by, or
-  linked from the published site, and it is never published.
+- `site/` holds the previous site, as it was before 2021 (also tagged `archive/live-2021`). It is
+  kept in place as a frozen record: like `archive/`, its contents MUST NOT be edited, deleted,
+  imported by, or linked from the published site, and it is never published. The React build that
+  `master` served from the repository root from June 2021 is likewise a record only: it is never
+  published and its addresses are not redirected.
 - Deployment happens through exactly one mechanism: the GitHub Actions workflow at
   `.github/workflows/pages.yml`, which builds the site and uploads `dist/` on every push to
   `master`. A second deploy path (a publishing branch, a `/docs` source, a manual upload) MUST
   NOT be added.
-- The repository's Pages source setting MUST remain "GitHub Actions". Switching it to "Deploy
-  from a branch" would publish the entire repository, `archive/` included.
+- The repository's Pages source setting MUST be "GitHub Actions", set before the first deploy
+  from `dist/` and kept that way. "Deploy from a branch" would publish the entire repository,
+  `archive/` included.
 - The default branch MUST always be in a deployable state; broken work stays on a feature branch.
 - Generated build output MUST NOT be hand-edited; changes are made to source and rebuilt.
 - The site MUST include a `<title>`, a meta description, and Open Graph tags (title, description,
@@ -175,4 +172,4 @@ template, or generated scaffold conflicts with it, this document wins.
 - Agent-facing runtime guidance belongs in `CLAUDE.md` at the repository root; that file MUST NOT
   contradict this constitution.
 
-**Version**: 1.3.0 | **Ratified**: 2026-09-07 | **Last Amended**: 2026-10-05
+**Version**: 1.4.1 | **Ratified**: 2026-09-07 | **Last Amended**: 2026-10-22

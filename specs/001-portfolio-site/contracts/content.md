@@ -11,7 +11,7 @@ Principle V, FR-020, FR-032).
 author:
   name: Athena Fung
   role: Software engineer building <one-line focus>
-  strengths:            # 2 to 4
+  strengths:            # optional; 2 to 4 when given
     - <strength>
     - <strength>
   location: <City, Region>          # optional; never a street address
@@ -29,10 +29,10 @@ author:
       summary: <one or two sentences>
       highlights:       # optional, up to 5
         - <highlight>
-  skills:
+  skills:               # optional
     - group: Languages
       items: [<item>, <item>]
-  resume: /resume.pdf   # file must exist in public/
+  resume: /resume.pdf   # optional; when set, the file must exist in public/ (see below)
   contact:
     email: <address>
     github: https://github.com/athenafung1
@@ -47,7 +47,8 @@ Unknown keys (for example `phone` or `address`) are rejected (FR-036).
 - { id: home,     label: Home,     href: /,          order: 1 }
 - { id: about,    label: About,    href: /about/,    order: 2 }
 - { id: projects, label: Projects, href: /projects/, order: 3 }
-- { id: fun,      label: Fun,      href: /fun/,      order: 4 }
+- { id: musings,  label: Musings,  href: /musings/,  order: 4 }
+- { id: fun,      label: Fun,      href: /fun/,      order: 5 }
 ```
 
 This is the **only** place navigation is defined (FR-030).
@@ -60,7 +61,7 @@ The file name becomes the slug, and the detail page URL is `/projects/<slug>/`.
 ---
 title: <Project name>
 summary: <One to three sentences.>
-tech: [<Tech>, <Tech>]
+tech: [<Tech>, <Tech>]      # optional
 links:
   - { type: repository, url: https://github.com/... }
   - { type: demo, url: https://..., label: Live demo }
@@ -103,11 +104,35 @@ order: 1
 <Write-up, 1 to 150 words.>
 ```
 
-## `public/resume.pdf`
+## `src/content/musings/<slug>.md`
 
-The public resume. It must **not** contain a phone number or street address (FR-036). Replace the
-file in place to update it, and check that it agrees with the About page (spec edge case "Resume
-out of date"; quickstart §6).
+The file name becomes the slug, and the page URL is `/musings/<slug>/` (FR-037 to FR-039). Files in
+subfolders (for example a local `test/` folder of drafts) are not published.
+
+```markdown
+---
+title: <Title, up to 80 characters>
+description: <50–160 chars: the meta description and the one-line summary in lists>
+date: 2026-10-12              # optional; undated musings are listed after dated ones
+tags: [<tag>, <tag>]          # optional, up to 5
+---
+
+<Markdown body. Maths: $inline$ and $$display$$ (LaTeX), rendered to MathML at build time.
+Side notes: <span class="margin-note"><b>Title</b> text</span> inside a paragraph, or an
+<aside class="margin-note"> block for notes with display maths. HTML comments are dropped from
+the published page.>
+```
+
+Images used by a musing go in `public/musings/<slug>/` and are referenced as
+`/musings/<slug>/<file>`, with `width`, `height` and, for photos, a `srcset` no larger than the
+largest size they are shown at (constitution Principle IV).
+
+## `public/resume.pdf` (optional)
+
+Not in the repository by default (`.gitignore` lists it). To offer a resume, save the public
+version as `public/resume.pdf`, remove its line from `.gitignore`, and set `resume: /resume.pdf`
+in `profile.yaml`. It must **not** contain a phone number or street address (FR-036), and it must
+agree with the About page (spec edge case "Resume out of date"; quickstart §6).
 
 ## `public/og/`
 

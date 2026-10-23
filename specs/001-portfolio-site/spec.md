@@ -18,33 +18,44 @@
 - Q: What kinds of media should the Fun page's creative-work entries be able to show? → A: Images stored on the site, plus plain links out to video, audio, or writing hosted elsewhere.
 - Q: Should the public, downloadable resume leave out the phone number and street address? → A: Yes; the public resume shows only email, city/region, and profile links.
 
+### Session 2026-10-22
+
+- Q: Must every project entry list the technologies used? → A: No; the technologies list is optional, and an entry without one shows no technologies.
+- Q: Must the About page offer a downloadable resume? → A: No; the resume is optional, and without one the About page shows no download link.
+- Q: Must the site keep exactly four top-level pages? → A: No; it needs at least one. The current top-level pages are Landing, About, Projects, Musings and Fun.
+- Q: Are the landing page's strengths, featured projects and primary action required? → A: No; each is optional. The author's name and one-line role stay required, as the constitution's identity section.
+- Q: Are the About page's biography, education, skills and closing call to contact required? → A: No; each is optional. Work or research experience stays required while no resume is offered, as the constitution's resume-equivalent section.
+- Q: Does the photography film strip satisfy the Fun page requirement? → A: Yes. Photography is creative work, and the strip, which draws each photo with Fourier epicycles before showing it, is the math-flavoured interactive piece.
+- Q: Must previously published addresses redirect to the new pages? → A: No; the old site is left untouched in the repository's history, and GitHub Pages publishes only the new build.
+- Q: Is a writing section in scope? → A: Yes; Musings, a list of write-ups with one page each.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - First impression on the landing page (Priority: P1)
 
 A visitor (most often a recruiter, hiring manager, or fellow engineer following a link from a
 resume, LinkedIn, or GitHub) arrives at the site root. Within a few seconds they learn who Athena
-is, what the author does, and what the author is best at. A distinctive but uncluttered visual identity makes
-the site memorable. From the landing page the visitor can reach every other page and every
-contact channel.
+is and what the author does, and, if the author highlights them, what the author is best at. A
+distinctive but uncluttered visual identity makes the site memorable. From the landing page the
+visitor can reach every other page and every contact channel.
 
 **Why this priority**: Most visitors decide within seconds whether to keep reading. A landing page
-that names the author, states the author's strengths, and links onward is a usable portfolio on its own,
-even before any other page exists.
+that names the author, says what the author does, and links onward is a usable portfolio on its
+own, even before any other page exists.
 
 **Independent Test**: Load only the landing page at each supported screen width. Confirm that a
-first-time viewer can state the author's name, role, and top strengths, and can reach email,
-GitHub, and LinkedIn, all without scrolling at a 1280×720 viewport.
+first-time viewer can state the author's name and role, and any strengths shown, and can reach
+email, GitHub, and LinkedIn.
 
 **Acceptance Scenarios**:
 
 1. **Given** a visitor opens the site root, **When** the page finishes loading, **Then** the
-   author's name, a one-line description of what the author does, and 2 to 4 highlighted strengths are
-   visible without scrolling at a 1280×720 viewport.
+   author's name and a one-line description of what the author does are visible without scrolling
+   at a 1280×720 viewport, along with 2 to 4 highlighted strengths if the author provides them.
 2. **Given** a visitor is on the landing page, **When** they look for ways to contact the author,
    **Then** email, GitHub, and LinkedIn links are present and work with scripting disabled.
 3. **Given** a visitor is on the landing page, **When** they use the site navigation, **Then**
-   they can reach the About, Projects, and Fun pages in one click or tap.
+   they can reach every other top-level page in one click or tap.
 4. **Given** a visitor on a 320px-wide phone, **When** they view the landing page, **Then** all
    content is readable and the page never scrolls horizontally.
 
@@ -54,19 +65,22 @@ GitHub, and LinkedIn, all without scrolling at a 1280×720 viewport.
 
 A visitor who wants evidence of ability opens the Projects page and scans a set of project
 entries. Each entry gives enough to judge relevance at a glance (title, short summary,
-technologies, and links) and lets the visitor go deeper through a repository, demo, or writeup.
+technologies where listed, and links) and lets the visitor go deeper through a repository, demo,
+or writeup.
 
 **Why this priority**: Projects are the main evidence a portfolio offers. Without them the site
 makes claims it cannot back up. The constitution requires at least one real project entry before
 deploy.
 
 **Independent Test**: Open the Projects page directly by its address. Confirm each entry shows a
-title, a 1 to 3 sentence summary, the technologies used, and at least one working outbound link.
+title, a 1 to 3 sentence summary, the technologies used (when the entry lists them), and at least
+one working outbound link.
 
 **Acceptance Scenarios**:
 
 1. **Given** a visitor opens the Projects page, **When** it loads, **Then** every project entry
-   shows a title, a 1 to 3 sentence summary, the technologies used, and at least one link.
+   shows a title, a 1 to 3 sentence summary, the technologies used (when listed), and at least one
+   link.
 2. **Given** a project entry, **When** the visitor activates its link, **Then** they reach the
    repository, live demo, writeup, or publication it names.
 3. **Given** the author marks some projects as featured, **When** the Projects page loads,
@@ -81,24 +95,25 @@ title, a 1 to 3 sentence summary, the technologies used, and at least one workin
 
 ### User Story 3 - Learning more on the About page (Priority: P2)
 
-A visitor who is interested opens the About page for the fuller story: background, education,
-experience, skills, what the author is looking for, and a resume.
+A visitor who is interested opens the About page for the fuller story: experience, plus whichever
+of background, education, skills, what the author is looking for, and a resume the author offers.
 
 **Why this priority**: The About page turns interest into a contact or an interview, but it
 assumes the visitor is already engaged by the landing and projects pages.
 
-**Independent Test**: Open the About page directly. Confirm it presents background, education,
-experience, skills, and a resume download, and that the download and each contact link work.
+**Independent Test**: Open the About page directly. Confirm it presents work or research
+experience and whatever background, education, skills, or resume download the author provides,
+and that the download and each contact link work.
 
 **Acceptance Scenarios**:
 
-1. **Given** a visitor opens the About page, **When** it loads, **Then** it shows a short
-   biography, education, work or research experience, and a grouped list of skills.
-2. **Given** a visitor wants a resume, **When** they activate the resume link on the About page,
-   **Then** they can download the author's current resume as a document, and the same experience
-   is also readable on the About page itself.
-3. **Given** a visitor finishes reading the About page, **When** they reach the end, **Then** a
-   clear call to contact the author is present.
+1. **Given** a visitor opens the About page, **When** it loads, **Then** it shows work or
+   research experience, and any short biography, education, or grouped skills the author provides.
+2. **Given** the author offers a resume, **When** a visitor activates the resume link on the About
+   page, **Then** they can download the author's current resume as a document, and the same
+   experience is also readable on the About page itself.
+3. **Given** the author includes a closing call to contact, **When** a visitor reaches the end of
+   the About page, **Then** it is clear and its links work.
 
 ---
 
@@ -114,6 +129,9 @@ content:
 - **Interactive pieces**: at least one playful, math-flavoured interactive element (for example a
   visual animation driven by a mathematical idea, or a small toy the visitor can poke at), plus
   optional hidden "easter eggs" for curious visitors to find.
+
+The photography film strip counts as both: the photos are creative work, and the strip draws each
+one with Fourier epicycles before showing it, with controls to step through and redraw.
 
 **Why this priority**: It makes the site memorable and gives conversations an opening, but a
 visitor can judge the author's qualifications without it.
@@ -190,8 +208,6 @@ The user wants the site to look "sleek" and to "stand out." For this spec that m
   links, with no broken-image icon or empty frame.
 - **Very long content**: an unusually long project title, summary, or skill list wraps cleanly at
   320px without overlapping or causing horizontal scroll.
-- **Old addresses**: a visitor who follows a previously published address (for example the old
-  About or Projects page addresses) reaches the equivalent new page rather than a dead end.
 - **Unknown address**: a visitor who mistypes an address can get back to the landing page in one
   step.
 - **Slow connection**: on a throttled mobile connection, the author's name and intro appear before
@@ -220,30 +236,31 @@ The user wants the site to look "sleek" and to "stand out." For this spec that m
 
 **Site structure and navigation**
 
-- **FR-001**: The site MUST have four top-level pages: Landing (the site root), About, Projects,
-  and Fun.
+- **FR-001**: The site MUST have at least one top-level page. The current top-level pages are
+  Landing (the site root), About, Projects, Musings, and Fun.
 - **FR-002**: Every page MUST show the same primary navigation, listing all top-level pages, with
   the current page visibly indicated.
 - **FR-003**: Every page MUST show the author's contact links (email, GitHub, LinkedIn) in a
   consistent location. These links MUST work with scripting disabled.
 - **FR-004**: Each page MUST have its own stable, human-readable address (for example `/about/`)
   so it can be linked to directly.
-- **FR-005**: Previously published page addresses MUST lead visitors to the equivalent new page.
+- **FR-005**: Removed (2026-10-22). Previously published addresses are not redirected; the old
+  site is left untouched and only the new build is published.
 
 **Landing page**
 
-- **FR-006**: The landing page MUST show the author's name, a one-line statement of what the author does,
-  and 2 to 4 highlighted strengths or assets, all visible without scrolling at a 1280×720
-  viewport.
-- **FR-007**: The landing page MUST surface at least one featured project and link to the full
-  Projects page.
-- **FR-008**: The landing page MUST give a clear primary action (for example "View projects" or
+- **FR-006**: The landing page MUST show the author's name and a one-line statement of what the
+  author does, visible without scrolling at a 1280×720 viewport (the constitution's identity
+  section). It MAY also show 2 to 4 highlighted strengths or assets, visible in the same way.
+- **FR-007**: The landing page MAY surface featured projects and link to the full Projects page.
+- **FR-008**: The landing page MAY give a clear primary action (for example "View projects" or
   "Get in touch") above the fold.
 
 **Projects page**
 
-- **FR-009**: Each project entry MUST include a title, a 1 to 3 sentence summary, the technologies
-  used, and at least one link (repository, live demo, writeup, or publication).
+- **FR-009**: Each project entry MUST include a title, a 1 to 3 sentence summary, and at least one
+  link (repository, live demo, writeup, or publication). It MAY list the technologies used; an
+  entry without them MUST still render cleanly, with no empty technologies list.
 - **FR-010**: A project entry MAY include an image and a date or time period. When it has no
   image, it MUST still render cleanly.
 - **FR-011**: Projects marked as featured MUST appear before the others. Within each group,
@@ -257,20 +274,25 @@ The user wants the site to look "sleek" and to "stand out." For this spec that m
 
 **About page**
 
-- **FR-013**: The About page MUST include a short biography, education, work or research
-  experience, and grouped skills, rendered on the page as readable content.
-- **FR-014**: The About page MUST link to a downloadable copy of the author's current resume. The
-  experience and education shown on the page MUST NOT contradict the downloadable resume.
+- **FR-013**: The About page MAY include a short biography, education, work or research
+  experience, and grouped skills, rendered on the page as readable content. While no resume is
+  offered (FR-014), it MUST include work or research experience, the resume-equivalent section the
+  constitution requires.
+- **FR-014**: The About page MAY link to a downloadable copy of the author's current resume. When it
+  does, the experience and education shown on the page MUST NOT contradict the downloadable resume,
+  and without one the page MUST NOT show a resume link.
 - **FR-036**: The downloadable resume and every page MUST NOT contain the author's phone number or
   street address. Personal contact details on the site are limited to email, city or region, and
   profile links (GitHub, LinkedIn).
-- **FR-015**: The About page MUST end with a call to contact the author.
+- **FR-015**: The About page MAY end with a call to contact the author.
 
 **Fun page**
 
 - **FR-016**: The Fun page MUST present interest and endeavour entries (personal interests, side
   pursuits, and creative work) and at least one math-flavoured interactive piece, using the shared
-  navigation and visual identity.
+  navigation and visual identity. The photography film strip satisfies both: its photos are
+  creative work, and it draws each one with Fourier epicycles. Interest entries written as text
+  are optional.
 - **FR-017**: Each interactive piece MUST be operable by mouse, touch, and keyboard, and MUST
   have a static fallback (image or description) shown when scripting is unavailable.
 - **FR-018**: Interactive pieces and media MUST NOT delay the appearance of the page's text
@@ -318,21 +340,35 @@ The user wants the site to look "sleek" and to "stand out." For this spec that m
 - **FR-032**: Project entries MUST be editable by the author directly in plain, human-readable
   content, without a CMS, database, or admin interface.
 
+**Musings**
+
+- **FR-037**: The Musings page MUST list every published musing, dated ones newest first and then
+  undated ones in a stable order. Each entry MUST show its title and one-line description, and its
+  date when it has one.
+- **FR-038**: Each musing MUST have its own page with its title, description, reading time, any
+  tags, and its date when it has one, and MUST link back to the Musings page. Mathematical
+  notation MUST be rendered when the site is built, so it stays readable with scripting disabled
+  and adds no script, stylesheet, or font to the page.
+- **FR-039**: The author MUST be able to add a musing by editing plain content only, in the same
+  way as project entries (FR-032).
+
 ### Key Entities
 
 - **Page**: A top-level destination on the site. Attributes: name shown in navigation, address,
   title, description, sharing preview image, and position in the navigation order.
 - **Project**: A piece of work being showcased. Attributes: title, summary (1 to 3 sentences),
-  technologies, one or more links (each with a type: repository, demo, writeup, or publication),
-  optional image with alt text, optional date or period, featured flag, display order, and an
-  optional project detail page.
+  optional technologies, one or more links (each with a type: repository, demo, writeup, or
+  publication), optional image with alt text, optional date or period, featured flag, display
+  order, and an optional project detail page.
 - **Project detail page**: An in-depth page for one project. Attributes: the project it belongs
   to, problem, approach, outcome, supporting visuals or code excerpts (images with alt text), and
   its own title, description, and sharing preview. One project has at most one detail page.
 - **Profile**: The author's identity and contact details. Attributes: name, one-line role
-  statement, highlighted strengths (2 to 4), short biography, education, experience entries,
-  skill groups, downloadable resume (public version without phone or street address), and
-  contact links (email, GitHub, LinkedIn).
+  statement, optional highlighted strengths (2 to 4), short biography, education, experience
+  entries, optional skill groups, optional downloadable resume (public version without phone or
+  street address), and contact links (email, GitHub, LinkedIn).
+- **Musing**: A write-up with its own page. Attributes: title, one-line description, optional
+  date, optional tags, and a body that may contain mathematical notation, figures, and side notes.
 - **Interest entry**: A personal interest, side pursuit, or piece of creative work shown on the
   Fun page. Attributes: title, short write-up, optional category (for example creative work),
   optional images with alt text (stored on the site), optional outbound media links (each with a
@@ -365,7 +401,7 @@ The user wants the site to look "sleek" and to "stand out." For this spec that m
 - **SC-008**: The author can add a new placeholder page, live in navigation on every page, in
   under 30 minutes by following the documented steps.
 - **SC-009**: Zero broken internal links and zero console errors on any page of the deployed site.
-- **SC-010**: Every previously published page address resolves to its equivalent new page.
+- **SC-010**: Removed (2026-10-22), with FR-005.
 
 ## Assumptions
 
@@ -382,8 +418,9 @@ The user wants the site to look "sleek" and to "stand out." For this spec that m
 - **Not-found page**: A custom not-found page is optional under constitution v1.2.0. The existing
   one may be restyled to match or removed. The "Unknown address" edge case is satisfied either way
   as long as the visitor can get back to the landing page.
-- **Out of scope**: blog or writing system, search, project filtering or category grouping,
-  analytics, multilingual support, and a CMS.
-  These can be added later as new pages under FR-030.
+- **Out of scope**: search, project filtering or category grouping, analytics, multilingual
+  support, and a CMS. These can be added later as new pages under FR-030. (Musings, added
+  2026-10-22, is the site's writing section.)
 - **Prior versions**: Earlier site versions under `archive/` are reference only and are not
-  modified, per the constitution.
+  modified, per the constitution. The site published from `master` before this feature (a 2021
+  React build) is likewise left untouched; its addresses are not redirected.

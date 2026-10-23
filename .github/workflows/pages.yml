@@ -2,8 +2,8 @@ name: Deploy to GitHub Pages
 
 # The single deploy path (constitution v1.3.0). Builds the Astro site from src/ and public/
 # and publishes the build output in dist/ only. Everything else in the repository is never
-# uploaded and never reachable on the web: the hand-written site/ (a frozen, unpublished record
-# of the previous site), archive/, specs/, .specify/ and docs.
+# uploaded and never reachable on the web: site/ (the previous site, a frozen, unpublished
+# record), archive/, specs/, .specify/ and docs.
 
 on:
   push:

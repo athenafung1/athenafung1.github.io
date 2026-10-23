@@ -23,7 +23,7 @@ CSS. When scripting and motion are allowed, a small vanilla script (no Svelte) a
 curve on a canvas: it denoises into place, is traced, and spins on hover (research R11).
 
 Build output goes to `dist/` (Astro's default), the published directory under constitution
-v1.3.0. **No existing file is deleted or moved**: the hand-written `site/` stays in the repository
+v1.3.0. **No existing file is deleted or moved**: the previous site in `site/` stays in the repository
 as a frozen, unpublished record. The existing `pages.yml` workflow gains a build step, uploads
 `dist/` instead of `site/`, and remains the single deploy path.
 
@@ -82,7 +82,7 @@ Checked against constitution v1.3.0.
 | **III. Accessible and Responsive** | PASS | `BaseLayout` provides `header`, `nav`, `main` and `footer` and exactly one `h1` slot. Image `alt` is required by schema, and `alt=""` only through an explicit `decorative: true`. Contrast is checked in both themes. All controls are native `<button>`/`<a>` with `:focus-visible` styles. Content renders without JavaScript. Viewports 320, 768 and 1280 are checked in quickstart §4. |
 | **IV. Performance Budget** | PASS | Per-page budget allocation is in R10. Images go through `astro:assets` to AVIF/WebP with `width`/`height` and responsive `srcset`. Two font families are self-hosted through the Fonts API. There are no analytics or third-party scripts. Lighthouse CI asserts the budget on every pull request, and its report link is pasted into the PR description. Social-sharing images in `public/og/` are PNG on purpose: pages never load them (only link-preview services fetch them), many of those services reject WebP and AVIF, so they are outside the page-image rule. |
 | **V. Minimum Viable Complexity** | JUSTIFIED | Adds a framework, a build step and a component library for the islands. See Complexity Tracking. Content stays in Markdown and YAML that the author edits directly. No CMS. `archive/` is untouched. |
-| Hosting: `dist/` is the only published directory; `site/` frozen | PASS (requires v1.3.0, task T002) | v1.3.0 makes `dist/` (build output from `src/` and `public/`) the published directory and keeps the hand-written `site/` in place as a frozen, unpublished record. Astro's default `outDir` is `./dist`, which is already in `.gitignore`. No existing file is deleted, moved or edited. |
+| Hosting: `dist/` is the only published directory; `site/` frozen | PASS (requires v1.3.0, task T002) | v1.3.0 makes `dist/` (build output from `src/` and `public/`) the published directory and keeps the previous site in `site/` in place as a frozen, unpublished record. Astro's default `outDir` is `./dist`, which is already in `.gitignore`. No existing file is deleted, moved or edited. |
 | Hosting: single deploy mechanism | PASS | `.github/workflows/pages.yml` stays the only deploy path. It gains `setup-node`, `npm ci`, `npm test` and `npm run build`, and uploads `./dist` instead of `./site`. The new `checks.yml` runs on pull requests and never deploys. |
 | Hosting: Pages source "GitHub Actions", HTTPS | PASS | Unchanged. |
 | Hosting: generated output not hand-edited | PASS | `dist/` is in `.gitignore`, and only `src/` and `public/` are edited. |
@@ -205,7 +205,7 @@ tests/
 └── checks.yml              # PR: astro check, vitest, build, check-content, lychee, Lighthouse CI
 
 dist/                       # BUILD OUTPUT ONLY, git-ignored, uploaded by pages.yml
-site/                       # previous hand-written site: kept intact, frozen, no longer published
+site/                       # previous site: kept intact, frozen, no longer published
 archive/                    # unchanged
 ```
 

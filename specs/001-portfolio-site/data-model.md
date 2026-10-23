@@ -20,14 +20,14 @@ id `author`. Spec entity: **Profile**.
 |---|---|---|
 | `name` | string | Required, 1–80 |
 | `role` | string | Required, one line ≤ 120; shown on Landing (FR-006) |
-| `strengths` | string[] | Required, **2–4** items, each ≤ 60 (FR-006) |
+| `strengths` | string[]? | Optional; **2–4** items when given, each ≤ 60 (FR-006) |
 | `bio` | string (plain text) | Required, 1–1200. Paragraphs separated by a blank line; rendered as `<p>` elements with no Markdown dependency (About, FR-013) |
 | `location` | string? | City or region only (FR-036) |
 | `seeking` | string? | What the author is looking for (User Story 3) |
 | `education` | Education[] | Required, ≥ 1 |
 | `experience` | Experience[] | Required, ≥ 1 (work or research) |
-| `skills` | SkillGroup[] | Required, ≥ 1 group |
-| `resume` | string | Required. Path under `public/`, must end in `.pdf` and the file must exist at build time (FR-014) |
+| `skills` | SkillGroup[]? | Optional (FR-013) |
+| `resume` | string? | Optional (FR-014). When set: a path under `public/` ending in `.pdf`, and the file must exist at build time |
 | `contact.email` | email | Required (`z.email()`) |
 | `contact.github` | URL | Required, host `github.com` |
 | `contact.linkedin` | URL | Required, host `linkedin.com` or `www.linkedin.com` |
@@ -87,7 +87,7 @@ the URL segment. Spec entities: **Project** and **Project detail page**.
 |---|---|---|
 | `title` | string | Required, 1–80 |
 | `summary` | string | Required, **1–3 sentences** (counted by `content-rules.ts`), ≤ 400 (FR-009) |
-| `tech` | string[] | Required, ≥ 1, each ≤ 30 (FR-009) |
+| `tech` | string[] | Optional, defaults to empty; each ≤ 30 (FR-009) |
 | `links` | ProjectLink[] | Required, **≥ 1** (FR-009) |
 | `image` | Image? | Optional (FR-010). If omitted the card renders a text-only layout with no empty frame |
 | `period` | string? | Free text, e.g. "Spring 2026" or "2025–present" |
@@ -116,8 +116,8 @@ failure):
 **Ordering** (FR-011): sort by `featured` descending, then `order` ascending. No other sorting,
 filtering or grouping.
 
-**Landing selection** (FR-007): featured projects in the same order, capped at 3. The build fails
-if no project is featured, because the Landing page must surface at least one.
+**Landing selection** (FR-007): featured projects in the same order, capped at 3. Optional: the list
+is empty when no project is featured.
 
 **Collection-level rules**: ≥ 1 project (constitution Principle II); `order` unique within each
 `featured` group (build error on duplicate, to keep order deterministic).
@@ -125,6 +125,24 @@ if no project is featured, because the Landing page must surface at least one.
 **Lifecycle**: a project has no runtime state. Its only "states" are authoring flags:
 `featured` (card on Landing and first on Projects) and `detail` (a detail page exists). Toggling
 either takes effect on the next build.
+
+---
+
+## Musing
+
+A write-up with its own page. Source: `src/content/musings/<slug>.md` (files directly in that
+folder only), collection `musings`. Spec entity: **Musing**, FR-037 to FR-039.
+
+| Field | Type | Rules |
+|---|---|---|
+| `title` | string | Required, 1–80 |
+| `description` | string | Required, 50–160; the page's meta description and the line under the title in lists |
+| `date` | date? | Optional. Undated musings are listed after the dated ones |
+| `tags` | string[] | Optional, up to 5, each ≤ 24; defaults to empty |
+| body | Markdown | `$…$` and `$$…$$` are rendered to MathML at build time; HTML comments are dropped |
+
+**Ordering** (FR-037): dated musings newest first, then undated ones; ties by slug, so the order
+never depends on file order.
 
 ---
 
@@ -222,6 +240,7 @@ Nav item (n) ─────────── renders ─────▶ SiteNa
 Project (n) ──0..1──▶ Project detail page (/projects/<slug>/)
 Project [featured] (1..3) ─▶ Landing
 Interest entry (n) ──────▶ Fun
+Musing (n) ──────────────▶ Musings, and its own page (/musings/<slug>/)
 Interactive piece (≥1) ──▶ Fun
 Easter egg (n) ──────────▶ any page listed in `pages`
 ```
@@ -230,15 +249,15 @@ Easter egg (n) ──────────▶ any page listed in `pages`
 
 | Rule | Spec |
 |---|---|
-| Profile strengths 2–4, role line | FR-006 |
+| Role line required; strengths optional, 2–4 when given | FR-006 |
 | No phone/street fields; strict schema | FR-036 |
-| Resume path must exist | FR-014 |
+| Resume optional; when set, the path must exist | FR-014 |
 | Nav single source, `aria-current` | FR-002, FR-030 |
 | Required page metadata props | FR-028 |
-| Project summary 1–3 sentences, tech, ≥ 1 link | FR-009 |
+| Project summary 1–3 sentences, ≥ 1 link, optional tech | FR-009 |
 | Optional image, text-only layout | FR-010 |
 | Featured then order, nothing else | FR-011 |
-| ≥ 1 featured project | FR-007 |
+| Featured projects optional | FR-007 |
 | Detail-page headings and visual | FR-033 |
 | Image alt rules | FR-025 |
 | Interest media: images + links, no embeds | FR-035 |
@@ -246,3 +265,4 @@ Easter egg (n) ──────────▶ any page listed in `pages`
 | Piece fallback required | FR-017 |
 | Egg self-ending, dismissible, touch trigger | FR-019 |
 | Theme storage and resolution | FR-034 |
+| Musing fields, listing order, own page | FR-037–039 |
