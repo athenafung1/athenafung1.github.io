@@ -1,6 +1,35 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import svelte from '@astrojs/svelte';
+import { satteri } from '@astrojs/markdown-satteri';
+import katex from 'katex';
+
+// $…$ and $$…$$ in Markdown become native MathML at build time, so no KaTeX script, stylesheet or
+// font reaches the page. Display equations get a wrapper that can scroll sideways on narrow screens.
+/** @param {string} tex @param {boolean} displayMode */
+function toMathML(tex, displayMode) {
+  return (
+    katex
+      .renderToString(tex, { output: 'mathml', displayMode })
+      // Browsers set a function name tight against what follows ("cosθ"); TeX puts a thin space
+      // after it, and before it when it follows a letter or number ("r cos θ"), but not before a
+      // bracket.
+      .replace(/<mo>⁡<\/mo>(?!<mo[^>]*>[([{|])/g, '<mo rspace="0.1667em">⁡</mo>')
+      .replace(/(<\/(?:mi|mn|msub|msup|msubsup)>)(<mi[^>]*>[^<]{2,}<\/mi><mo[^>]*>⁡)/g, '$1<mspace width="0.1667em"></mspace>$2')
+  );
+}
+
+const mathml = {
+  name: 'mathml',
+  /** @param {{ value: string }} node @param {any} ctx */
+  math(node, ctx) {
+    ctx.replaceNode(node, { type: 'html', value: `<div class="math-display">${toMathML(node.value, true)}</div>` });
+  },
+  /** @param {{ value: string }} node @param {any} ctx */
+  inlineMath(node, ctx) {
+    ctx.replaceNode(node, { type: 'html', value: toMathML(node.value, false) });
+  },
+};
 
 // Static build for GitHub Pages (user site, served from the domain root).
 // Output goes to Astro's default `dist/`, which pages.yml uploads. The hand-written
@@ -14,6 +43,7 @@ export default defineConfig({
   },
   integrations: [svelte()],
   markdown: {
+    processor: satteri({ features: { math: true }, mdastPlugins: [mathml] }),
     // Dual themes as CSS variables; ProjectLayout picks one with light-dark() so code blocks follow
     // the site theme (including the manual toggle).
     shikiConfig: {

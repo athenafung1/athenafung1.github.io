@@ -35,7 +35,8 @@ as a frozen, unpublished record. The existing `pages.yml` workflow gains a build
 **Primary Dependencies**: `astro` 7.x (static output, content collections, `astro:assets`, Fonts
 API), `@astrojs/svelte` 9.x, `svelte` 5.x, and `sharp` for image conversion (Astro's default image
 service). Dev only: `vitest` 5.x and `@astrojs/check`. Each is justified in
-[research.md](./research.md) R3 and R13.
+[research.md](./research.md) R3 and R13. Also dev only, for maths in musings: `katex` and
+`@astrojs/markdown-satteri` (see Complexity Tracking).
 
 **Storage**: Files only. Markdown and YAML content under `src/content/` and `src/data/`, plus
 static assets under `public/`. The visitor's theme choice lives in the browser's `localStorage`,
@@ -223,3 +224,4 @@ repository is deleted or moved.
 | UI component library for islands (Svelte 5) | The interactive pieces carry real UI state: freehand pointer drawing, a term-count slider, preset selection, play/pause and reset, all kept in sync with a canvas. Svelte's compiled reactivity keeps this small, and its runtime is loaded only on the Fun page or when an easter egg is triggered (size measured against the R10 budget). | Vanilla JS could build one piece, but the author plans to add more over time, and hand-wiring state to DOM for each piece is the larger long-term cost. Svelte stays confined to `src/islands/`. Content pages ship zero Svelte. |
 | `sharp` (image processing) | Required by `astro:assets` to emit AVIF/WebP at multiple widths (Principle IV). | Converting and resizing every image by hand is error-prone and breaks the "author edits plain content" workflow. |
 | Dev tooling (`vitest`, `@astrojs/check`) | Constitution requires unit tests for non-trivial JS. Vitest shares Astro's Vite config, so TypeScript and import aliases work unchanged. `astro check` type-checks `.astro` and `.svelte` files. | `node:test` has no dependency but would need separate TypeScript handling and import-specifier rules that differ from the app code. Both tools are dev-only and never shipped. |
+| Maths in musings (`katex`, `@astrojs/markdown-satteri`) | Musings explain the site's maths (Fourier series, DFT, edge detection) and need typeset equations. Sätteri, Astro 7's default Markdown processor, already parses `$…$`; `@astrojs/markdown-satteri` turns that on, and a small plugin in `astro.config.mjs` renders each equation with KaTeX to native MathML at build time. Nothing is shipped: no script, stylesheet or font, and MathML is in every target browser. Converting LaTeX to MathML is far more than 50 lines. | Hand-written MathML needs no dependency but is unreadable to edit in Markdown. Unicode text can't show fractions, limits or matrices. `remark-math` + `rehype-katex` would need the deprecated `unified` processor (`@astrojs/markdown-remark`). Client-side KaTeX or MathJax would add script, CSS and fonts to the page. |
