@@ -11,6 +11,9 @@ interface Props {
   widths?: number[];
   sizes?: string;
   eager?: boolean;
+  /** Fetch after everything else, for images not shown at first (such as film-strip photos that
+      stay hidden until their drawing finishes). */
+  lowPriority?: boolean;
   class?: string;
 }
 
@@ -21,6 +24,7 @@ const {
   widths = [320, 480, 640, 960, 1280],
   sizes = '(min-width: 48rem) 50vw, 100vw',
   eager = false,
+  lowPriority = false,
   class: className,
 } = Astro.props;
 
@@ -40,6 +44,6 @@ const usableWidths = [...new Set([...widths.filter((w) => w < src.width), src.wi
   sizes={sizes}
   loading={eager ? 'eager' : 'lazy'}
   decoding="async"
-  fetchpriority={eager ? 'high' : undefined}
+  fetchpriority={eager ? 'high' : lowPriority ? 'low' : undefined}
   class={className}
 />
